@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 	<head>
 		<meta charset="UTF-8">
@@ -40,11 +40,11 @@
 					<p>逗你玩呢</p>
 				</div>
 				<div class="right">
-					<form class="layui-form layui-form-pane" action="/toFrame">
+					<form class="layui-form layui-form-pane" action="/login">
 						<div class="layui-form-item">
 							<label class="layui-form-label login_title"><i class="iconfont icon-gerenzhongxin-denglu"></i></label>
 							<div class="layui-input-block login_input">
-								<input type="text" name="name" required lay-verify="required" autocomplete="off" placeholder="请输入您的用户名" class="layui-input">
+								<input type="text" th:value="${name}" name="name" required lay-verify="required" autocomplete="off" placeholder="请输入您的用户名" class="layui-input">
 							</div>
 						</div>
 						<div class="layui-form-item">

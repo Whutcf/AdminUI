@@ -27,7 +27,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 @MapperScan(basePackages = MasterDataSourceConfig.PACKAGE, sqlSessionFactoryRef = "masterSqlSessionFactory")
 public class MasterDataSourceConfig {
 
-	public static final String PACKAGE = "com.smic.cf.dao.master";
+	public static final String PACKAGE = "com.smic.cf.mapper.master";
 //	public static final String MAPPER_LOCATION = "classpath:mapper/master/*.xml";
 
 	@Value("${spring.datasource.url}")
