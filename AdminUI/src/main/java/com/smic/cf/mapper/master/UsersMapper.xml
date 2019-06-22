@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.smic.cf.mapper.master.UsersMapper">
+  <!-- 配置一个映射关系 -->
+    <resultMap type="com.smic.cf.domain.User" id="userResultMap">
+        <id property="userId" column="user_id"/>
+    </resultMap>
+
 	<!-- 可以重复利用的SQL片段 -->
 	<sql id="baseColumnList">
 		user_id,username,password,state
@@ -14,7 +19,7 @@
 	</sql>
 	
 	<!-- 登录用户信息查询 -->
-	<select id="verifyUser" parameterType="com.smic.cf.domain.User" resultType="com.smic.cf.domain.User">
+	<select id="verifyUser" parameterType="com.smic.cf.domain.User" resultMap="userResultMap">
 		<include refid="selectAll"/>		
 		<where>
 			<if test="username != null and username != '' ">
@@ -25,5 +30,16 @@
 			</if>
 		</where>
 	</select>
+	
+	<!-- 根据用户id获取用户初始密码 -->
+	<select id="findUserPasswordById" parameterType="Integer" resultType="String">
+		select password from sys_user where user_id = #{userid}
+	</select>
+	
+	<!-- 修改密码 -->
+	<update id="updatePasswordById">
+		update sys_user set password = #{newpassword} where user_id = #{userid}
+	</update>
+	
 </mapper>
  

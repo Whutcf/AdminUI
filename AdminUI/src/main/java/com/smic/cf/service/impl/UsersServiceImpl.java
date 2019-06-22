@@ -32,4 +32,17 @@ public class UsersServiceImpl implements UsersService {
 		return usersMapper.verifyUser(username, password);
 	}
 
+	@Override
+	public String findUserById(Integer userid) {
+		log.info("查看用户的旧密码！");
+		String password = usersMapper.findUserPasswordById(userid);
+		return password;
+	}
+
+	@Override
+	public void updatePasswordById(Integer userid,String newPassword) {
+		log.info("修改密码！");
+		usersMapper.updatePasswordById(userid,newPassword);
+	}
+
 }

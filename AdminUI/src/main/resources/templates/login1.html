@@ -41,6 +41,12 @@
 				</div>
 				<div class="right">
 					<form class="layui-form layui-form-pane" action="/login">
+						<div th:if="${loginError}">
+							<p style="color: red; font-family: '微软雅黑';" th:text="${error}"></p>
+						</div>
+						<div th:if="${hasmsg}">
+							<p style="color: green; font-family: '微软雅黑';" th:text="${msg}"></p>
+						</div>
 						<div class="layui-form-item">
 							<label class="layui-form-label login_title"><i class="iconfont icon-gerenzhongxin-denglu"></i></label>
 							<div class="layui-input-block login_input">
@@ -57,9 +63,9 @@
 							<button class="layui-btn layui-btn-fluid login_but" lay-submit lay-filter="loginBut">登 录</button>
 						</div>
 						<div class="layui-form-item">
-							<input type="radio" name="sex" value="管理员" title="管理员" checked lay-filter="userType">
-							<input type="radio" name="sex" value="技术" title="技术" lay-filter="userType">
-							<input type="radio" name="sex" value="实施" title="实施" lay-filter="userType">
+							<input type="radio" name="role" value="admin" title="管理员" checked lay-filter="userType">
+							<input type="radio" name="role" value="manager" title="经理" lay-filter="userType">
+							<input type="radio" name="role" value="employee" title="员工" lay-filter="userType">
 						</div>
 					</form>
 				</div>
@@ -70,7 +76,8 @@
 				var form = layui.form;
 				//监听提交
 				form.on('submit(loginBut)', function(data) {
-					layer.msg(JSON.stringify(data.field));
+//					layer.msg(JSON.stringify(data.field),{time: 6000});
+					console.log(data);
 					return true;
 				});
 				//监听用户类型，改变风格
