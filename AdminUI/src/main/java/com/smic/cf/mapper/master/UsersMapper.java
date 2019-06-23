@@ -1,5 +1,7 @@
 package com.smic.cf.mapper.master;
 
+import java.util.HashMap;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -14,4 +16,8 @@ public interface UsersMapper {
 	String findUserPasswordById(Integer userid);
 
 	void updatePasswordById(@Param("userid")Integer userid,@Param("newpassword")String newPassword);
+
+	void insertUser(HashMap<String, String> userMap);
+
+	User findUserByUserName(String username);
 }

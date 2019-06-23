@@ -1,5 +1,7 @@
 package com.smic.cf.service.impl;
 
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,22 @@ public class UsersServiceImpl implements UsersService {
 	public void updatePasswordById(Integer userid,String newPassword) {
 		log.info("修改密码！");
 		usersMapper.updatePasswordById(userid,newPassword);
+	}
+
+	@Override
+	public void addUser(String username, String password, String state) {
+		log.info("处理注册用户！");
+		HashMap<String, String> userMap = new HashMap<>();
+		userMap.put("username", username);
+		userMap.put("password", password);
+		userMap.put("state", state);
+		usersMapper.insertUser(userMap);
+	}
+
+	@Override
+	public User findUserByUsername(String username) {
+		 
+		return usersMapper.findUserByUserName(username);
 	}
 
 }

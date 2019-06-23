@@ -39,7 +39,13 @@ public class PageController {
 	@GetMapping("/toLogin")
 	public String toLogin() {
 		log.info("跳转登录页面!");
-		return "login1";
+		return "login";
+	}
+	
+	@GetMapping("/toRegist")
+	public String toRegist() {
+		log.info("跳转登录页面!");
+		return "regist";
 	}
 	
 	@RequestMapping("tgls/toModifyPassword")

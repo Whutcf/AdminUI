@@ -8,4 +8,8 @@ public interface UsersService {
 	String findUserById(Integer userid);
 
 	void updatePasswordById(Integer userid,String newPassword);
+
+	void addUser(String username, String password, String state);
+
+	User findUserByUsername(String username);
 }

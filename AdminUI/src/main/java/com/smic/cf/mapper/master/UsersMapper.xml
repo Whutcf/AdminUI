@@ -36,10 +36,30 @@
 		select password from sys_user where user_id = #{userid}
 	</select>
 	
+	<!-- 根据用户名查找用户 -->
+	<select id="findUserByUserName" parameterType="String" resultType="com.smic.cf.domain.User">
+		<include refid="selectAll"/>
+		where username = #{username}
+		<!-- <where>
+			<if test="username != null and username != '' ">
+				username = #{username,jdbcType=VARCHAR}
+			</if>
+		</where> -->
+	</select>
+	
 	<!-- 修改密码 -->
 	<update id="updatePasswordById">
 		update sys_user set password = #{newpassword} where user_id = #{userid}
 	</update>
+	
+	<!-- 新增用户 -->
+	<insert id="insertUser" parameterType="hashmap">
+		<selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Integer">
+            select LAST_INSERT_ID()
+        </selectKey>
+		insert into sys_user (username,password,state) value (#{username},#{password},#{state})
+		
+	</insert>
 	
 </mapper>
  

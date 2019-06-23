@@ -44,7 +44,7 @@ public class UserController {
 				log.info("用户已失效！");
 				model.addAttribute("loginError",true);
 				model.addAttribute("error", "用户已失效，请联系管理员！");
-				return "login1";
+				return "login";
 			}
 			request.getSession().setAttribute("userid", user.getUserId());
 			return "frame";
@@ -53,7 +53,7 @@ public class UserController {
 		model.addAttribute("name", username);
 		model.addAttribute("loginError",true);
 		model.addAttribute("error", "用户名或密码错误！");
-		return "login1";
+		return "login";
 	}
 	
 	@RequestMapping("/modifyPassword")
@@ -71,7 +71,25 @@ public class UserController {
 		log.info("密码已修改！");
 		model.addAttribute("hasmsg",true);
 		model.addAttribute("msg", "密码已修改，请重新登录！");
-		return "login1";
+		return "login";
+	}
+	
+	@RequestMapping("/regist")
+	public String regist(Model model,HttpServletRequest request) {
+		log.info("新用户注册！");
+		String username = request.getParameter("userName");
+		String password = request.getParameter("passWord");
+		String state = request.getParameter("state");
+		User user = usersService.findUserByUsername(username);
+		if(!ObjectUtils.isEmpty(user)) {
+			model.addAttribute("username", username);
+			model.addAttribute("verifyFailure",true);
+			model.addAttribute("error", "用户名已存在！");
+			return "regist";
+		}
+		usersService.addUser(username,password,state);
+		log.info("添加用户成功");
+		return "frame";
 	}
 
 }
