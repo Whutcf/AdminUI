@@ -1,6 +1,7 @@
 package com.smic.cf.mapper.master;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -20,4 +21,10 @@ public interface UsersMapper {
 	void insertUser(HashMap<String, String> userMap);
 
 	User findUserByUserName(String username);
+
+	List<User> findAllUsers();
+
+	void updateStateById(@Param("state")String state,@Param("userId") Integer userId);
+
+	void deleteUserById(Integer userId);
 }

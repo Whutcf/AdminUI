@@ -67,7 +67,7 @@
 						<div class="title">用户注册</div>
 						<p th:if="${verifyFailure}" style="color: red; font-family: '微软雅黑';font-style: oblique;" th:text="${error}"></p>
 						<div class="con" onclick="getFocus(this)">
-							<input type="text" name="userName" th:value="${username}" lay-verify="userName" placeholder="请输入您的用户名" autocomplete="off" class="layui-input">
+							<input type="text" name="username" th:value="${username}" lay-verify="userName" placeholder="请输入您的用户名" autocomplete="off" class="layui-input">
 						</div>
 						<div class="con" onclick="getFocus(this)">
 							<input type="password" name="passWord" required  lay-verify="passWord" placeholder="请输入您的账户密码" autocomplete="off" class="layui-input">
@@ -75,7 +75,6 @@
 						<div class="but">
 							<button class="layui-btn" lay-submit lay-filter="formDemo">注册</button>
 						</div>
-						<!--<div class="apply"><a href="#">企业注册申请</a></div>-->
 					</form>
 				</div>
 				<script>

@@ -1,6 +1,7 @@
 package com.smic.cf.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,22 @@ public class UsersServiceImpl implements UsersService {
 	public User findUserByUsername(String username) {
 		 
 		return usersMapper.findUserByUserName(username);
+	}
+
+	@Override
+	public List<User> findAllUsers() {
+		 
+		return usersMapper.findAllUsers();
+	}
+
+	@Override
+	public void updateStateById(String state, Integer userId) {
+		usersMapper.updateStateById(state,userId);
+	}
+
+	@Override
+	public void deleteUserById(Integer userId) {
+		usersMapper.deleteUserById(userId);
 	}
 
 }

@@ -42,10 +42,5 @@ public class BaseController {
 		return "tgls/base/pages";
 	}
 
-	@GetMapping("/toMaintain")
-	public String maintainPage() {
-		log.info("页面维护中！");
-		return "tgls/base/maintain";
-	}
 
 }

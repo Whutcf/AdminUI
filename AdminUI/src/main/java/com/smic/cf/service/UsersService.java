@@ -1,5 +1,7 @@
 package com.smic.cf.service;
 
+import java.util.List;
+
 import com.smic.cf.domain.User;
 
 public interface UsersService {
@@ -12,4 +14,10 @@ public interface UsersService {
 	void addUser(String username, String password, String state);
 
 	User findUserByUsername(String username);
+
+	List<User> findAllUsers();
+
+	void updateStateById(String state, Integer userId);
+
+	void deleteUserById(Integer userId);
 }

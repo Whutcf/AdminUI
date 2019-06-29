@@ -1,13 +1,15 @@
 package com.smic.cf.controller;
 
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.smic.cf.domain.User;
 import com.smic.cf.service.UsersService;
@@ -35,24 +37,27 @@ public class UserController {
 	@RequestMapping("/login")
 	public String login(Model model,HttpServletRequest request) {
 		log.info("进入用户登录模块！");
-		String username = request.getParameter("name");
+		String username = request.getParameter("username");
 		String password = request.getParameter("password");
-		User user = usersService.verifyUser(username, password);
-		if(!ObjectUtils.isEmpty(user)) {
-			String state = user.getState();
-			if(STATE.equalsIgnoreCase(state)) {
-				log.info("用户已失效！");
-				model.addAttribute("loginError",true);
-				model.addAttribute("error", "用户已失效，请联系管理员！");
-				return "login";
+		if (password != null && username !=null) {			
+			User user = usersService.verifyUser(username, password);
+			if(!ObjectUtils.isEmpty(user)) {
+				String state = user.getState();
+				if(STATE.equalsIgnoreCase(state)) {
+					log.info("用户已失效！");
+					model.addAttribute("loginError",true);
+					model.addAttribute("error", "用户已失效，请联系管理员！");
+					return "login";
+				}
+				request.getSession().setAttribute("userid", user.getUserId());
+				request.getSession().setAttribute("userinfo", user);
+				return "frame";
 			}
-			request.getSession().setAttribute("userid", user.getUserId());
-			return "frame";
 		}
-		log.info("用户名或密码错误！");
-		model.addAttribute("name", username);
+		log.info("密码错误！");
+		model.addAttribute("username", username);
 		model.addAttribute("loginError",true);
-		model.addAttribute("error", "用户名或密码错误！");
+		model.addAttribute("error", "密码错误！");
 		return "login";
 	}
 	
@@ -74,10 +79,25 @@ public class UserController {
 		return "login";
 	}
 	
+	@RequestMapping("/checkUserName")
+	@ResponseBody
+	public String checkUserName(Model model,@RequestParam("username")String username) {
+		User user = usersService.findUserByUsername(username);
+		if(ObjectUtils.isEmpty(user)) {
+			log.info("用户名不存在，请注册帐号！");
+			model.addAttribute("username", username);
+			model.addAttribute("nameNotExist",true);
+			model.addAttribute("error", "用户名不存在，请注册帐号！");
+			System.out.println(model.toString());
+			return "SUCCESS";
+		}
+		return null;
+	}
+	
 	@RequestMapping("/regist")
-	public String regist(Model model,HttpServletRequest request) {
+	public String regist(Model model,HttpServletRequest request, RedirectAttributes redirectAttributes) {
 		log.info("新用户注册！");
-		String username = request.getParameter("userName");
+		String username = request.getParameter("username");
 		String password = request.getParameter("passWord");
 		String state = request.getParameter("state");
 		User user = usersService.findUserByUsername(username);
@@ -89,7 +109,16 @@ public class UserController {
 		}
 		usersService.addUser(username,password,state);
 		log.info("添加用户成功");
-		return "frame";
+		redirectAttributes.addAttribute("hasmsg", true);
+		redirectAttributes.addAttribute("msg", "您已注册成功，请登录！");
+		return "redirect:/toLogin";
 	}
+	
+	@RequestMapping("/logout")
+	public  String logout(HttpServletRequest request) {
+		request.getSession().removeAttribute("userinfo");
+		return "login";
+	}
+	
 
 }

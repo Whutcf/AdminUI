@@ -53,7 +53,22 @@ public class PageController {
 		log.info("进入修改密码页面！");
 		return "tgls/modify_password";
 	}
+	
 
+	@GetMapping("/toPermisson")
+	public String permissonPage() {
+		log.info("您无权访问该页面！");
+		return "nopermisson";
+	}
+	
+	@GetMapping("/toMaintain")
+	public String maintainPage() {
+		log.info("页面维护中！");
+		return "maintain";
+	}
+	
+	
+	
 	@GetMapping("tgls/toQdAPI")
 	public String toQdAPI() {
 		log.info("进入前端API，内有js用法提示内容");

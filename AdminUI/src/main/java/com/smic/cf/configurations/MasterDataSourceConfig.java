@@ -1,4 +1,4 @@
-package com.smic.cf.comfig;
+package com.smic.cf.configurations;
 
 import java.sql.SQLException;
 

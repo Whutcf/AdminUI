@@ -61,5 +61,20 @@
 		
 	</insert>
 	
+	<!-- 查询所有用户！ -->
+	<select id="findAllUsers" resultMap="userResultMap">
+		<include refid="selectAll"/>
+	</select>
+	
+	<!-- 根据Id修改用户状态 -->
+	<update id="updateStateById">
+		update sys_user set state = #{state} where user_id = #{userId}
+	</update>
+	
+	<!-- 删除用户 -->
+	<delete id="deleteUserById">
+		delete from sys_user where user_id = #{1}
+	</delete>
+	
 </mapper>
  

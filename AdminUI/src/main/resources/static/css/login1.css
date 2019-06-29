@@ -50,8 +50,9 @@ body{
 }
 .login_main .box .left{
 	width: 50%;
-	height: 240px;
+	height: 260px;
 	float: left;
+	padding: 10px 80px;
 	text-align: center;
 	border-right: 1px solid #dfe2e3;
 	box-sizing:border-box;
@@ -68,7 +69,7 @@ body{
 }
 .login_main .box .right{
 	width: 50%;
-	height: 240px;
+	height: 260px;
 	float: left;
 	padding: 10px 80px;
 	box-sizing:border-box;

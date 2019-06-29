@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="穷在闹市" />
+		<!-- 作者 -->
+		<meta name="revised" content="穷在闹市.v3, 2019/05/01" />
+		<!-- 定义页面的最新版本 -->
+		<meta name="description" content="网站简介" />
+		<!-- 网站简介 -->
+		<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+		<title>管理员维护页面</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+
+
+	</head>
+
+	<body>
+		<div class="cBody">
+			<table class="layui-hide" id="userlist" lay-filter="userlist"></table>
+		</div>
+		<script type="text/html" id="toolBar">
+			<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看用户角色</a>
+			<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+		</script>
+		<script type="text/html" id="switchTpl">
+			<input type="checkbox" name="state" value="{{d.state}}" lay-skin="switch" lay-text="是|否" lay-filter="userState" {{ d.state == "able" ? 'checked' : '' }}>
+		</script>
+		<script>
+			layui.use(['table', 'form'], function() {
+				var table = layui.table,
+					form = layui.form;
+
+				table.render({
+					elem: '#userlist',
+					url: 'showUserList',
+					method: 'POST',
+					cols: [
+						[{
+							type: 'checkbox'
+						}, {
+							field: 'userId',
+							title: 'ID',
+							width: 80,
+							unresize: true,
+							sort: true
+						}, {
+							field: 'username',
+							title: '用户性名',
+							width: 120
+						}, {
+							field: 'password',
+							title: '用户密码',
+							width: 150
+						}, {
+							field: 'state',
+							title: '是否生效',
+							width: 100,
+							templet: '#switchTpl',
+							unresize: true
+						}, {
+							fixed: 'right',
+							title: '用户编辑',
+							 width: 200,
+							align: 'center',
+							toolbar: '#toolBar'
+						}]
+					]
+				});
+				form.on('switch(userState)', function(obj) {
+					// layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+					var data = $(obj.elem),
+						id = data.parents('tr').first().find('td').eq(1).text();
+					var state = obj.elem.checked;
+					layer.confirm("确认修改状态?", {
+						btn: ['确定', '取消']
+					}, function() {
+						$.ajax({
+							url: 'changeState',
+							type: 'POST',
+							data: {
+								'userId': id,
+								'state': state
+							},
+							success: function() {
+								layer.msg("修改成功！", {
+										icon: 6,
+										time: 1000
+									}
+									/* , function() {
+																		location.reload();
+																	} */
+								);
+							}
+						});
+					}, function() {
+						layer.msg('取消修改', {
+							time: 2000, //20s后自动关闭
+						});
+					});
+				});
+
+				//监听工具条
+				table.on('tool(userlist)', function(obj) {
+					var data = obj.data;
+					if (obj.event === 'detail') {
+						layer.msg('ID：' + data.userId + ' 的查看操作');
+					} else if (obj.event === 'del') {
+						layer.confirm('真的删除行么', function() {
+							$.ajax({
+								url: '/deleteUser',
+								type: 'POST',
+								data: {
+									"userId": data.userId
+								},
+								success: function() {
+									layer.msg("删除成功！", {
+										icon: 6,
+										time: 1000
+									});
+								}
+							});
+						});
+					} else if (obj.event === 'edit') {
+						layer.alert('编辑行：<br>' + JSON.stringify(data))
+					}
+				});
+
+			});
+		</script>
+	</body>
+
+</html>

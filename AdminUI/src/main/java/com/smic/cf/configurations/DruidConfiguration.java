@@ -1,4 +1,4 @@
-package com.smic.cf.comfig;
+package com.smic.cf.configurations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import com.alibaba.druid.support.http.WebStatFilter;
 /**
  * 
  * @ClassName DruidConfiguration
- * @Description 可以将Druid作为连接池使用
+ * @Description 可以将Druid作为连接池使用，durid访问地址localhost:8080/druid/
  * @author cai feng
  * @date 2019年6月15日
  *
