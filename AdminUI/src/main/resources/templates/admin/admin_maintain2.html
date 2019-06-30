@@ -37,63 +37,84 @@
 	<body>
 		<div class="cBody">
 			<table class="layui-hide" id="userlist" lay-filter="userlist"></table>
-		</div>
-		<script type="text/html" id="toolBar">
-			<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看用户角色</a>
+
+			<!--头部工具栏-->
+			<script type="text/html" id="toolbarModify">
+				<div class="layui-btn-container">
+				<button class="layui-btn layui-btn-sm" lay-event="addUser">新增用户</button>
+				<button class="layui-btn layui-btn-sm" lay-event="deleteAll">删除选中行数据</button>
+				<button class="layui-btn layui-btn-sm" lay-event="isAll">是否全选</button>
+			</div>
+		</script>
+			<!--行内工具栏-->
+			<script type="text/html" id="modifyTable">
+				<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看用户角色</a>
 			<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
 			<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
 		</script>
-		<script type="text/html" id="switchTpl">
-			<input type="checkbox" name="state" value="{{d.state}}" lay-skin="switch" lay-text="是|否" lay-filter="userState" {{ d.state == "able" ? 'checked' : '' }}>
+			<script type="text/html" id="switchTpl">
+				<input type="checkbox" name="state" value="{{d.state}}" lay-skin="switch" lay-text="是|否" lay-filter="userState" {{ d.state == "T" ? 'checked' : '' }}>
 		</script>
+			<div class="layui-footer">
+				<!-- 底部固定区域 -->
+				© cf.com
+			</div>
+		</div>
+
 		<script>
 			layui.use(['table', 'form'], function() {
 				var table = layui.table,
 					form = layui.form;
+				ptable = function() {
+					table.render({
+						elem: '#userlist',
+						url: 'showUserListWithRoles',
+						toolbar: '#toolbarModify',
+						title: '用户数据表',
+						method: 'POST',
+						cols: [
+							[{
+								type: 'checkbox'
+							}, {
+								field: 'userId',
+								title: 'ID',
+								width: 80,
+								unresize: true,
+								sort: true
+							}, {
+								field: 'username',
+								title: '用户性名',
+								width: 120
+							}, {
+								field: 'password',
+								title: '用户密码',
+								width: 150
+							}, {
+								field: 'state',
+								title: '是否生效',
+								width: 100,
+								templet: '#switchTpl',
+								unresize: true
+							}, {
+								title: '用户编辑',
+								width: 200,
+								align: 'center',
+								toolbar: '#modifyTable'
+							}]
+						]
+					});
+				};
 
-				table.render({
-					elem: '#userlist',
-					url: 'showUserList',
-					method: 'POST',
-					cols: [
-						[{
-							type: 'checkbox'
-						}, {
-							field: 'userId',
-							title: 'ID',
-							width: 80,
-							unresize: true,
-							sort: true
-						}, {
-							field: 'username',
-							title: '用户性名',
-							width: 120
-						}, {
-							field: 'password',
-							title: '用户密码',
-							width: 150
-						}, {
-							field: 'state',
-							title: '是否生效',
-							width: 100,
-							templet: '#switchTpl',
-							unresize: true
-						}, {
-							fixed: 'right',
-							title: '用户编辑',
-							 width: 200,
-							align: 'center',
-							toolbar: '#toolBar'
-						}]
-					]
-				});
+				ptable();
+
+
 				form.on('switch(userState)', function(obj) {
 					// layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
 					var data = $(obj.elem),
 						id = data.parents('tr').first().find('td').eq(1).text();
 					var state = obj.elem.checked;
 					layer.confirm("确认修改状态?", {
-						btn: ['确定', '取消']
+						btn: ['确定', '取消'],skin: 'layui-layer-molv' 
 					}, function() {
 						$.ajax({
 							url: 'changeState',
@@ -104,46 +125,131 @@
 							},
 							success: function() {
 								layer.msg("修改成功！", {
-										icon: 6,
-										time: 1000
-									}
-									/* , function() {
-																		location.reload();
-																	} */
-								);
+									icon: 6,
+									time: 1000
+								});
+								ptable();
 							}
 						});
 					}, function() {
 						layer.msg('取消修改', {
+							icon: 2,
 							time: 2000, //20s后自动关闭
 						});
+						ptable();
 					});
 				});
 
-				//监听工具条
-				table.on('tool(userlist)', function(obj) {
-					var data = obj.data;
-					if (obj.event === 'detail') {
-						layer.msg('ID：' + data.userId + ' 的查看操作');
-					} else if (obj.event === 'del') {
-						layer.confirm('真的删除行么', function() {
-							$.ajax({
-								url: '/deleteUser',
-								type: 'POST',
-								data: {
-									"userId": data.userId
-								},
-								success: function() {
-									layer.msg("删除成功！", {
-										icon: 6,
-										time: 1000
+
+				//头工具栏事件
+				table.on('toolbar(userlist)', function(obj) {
+					var checkStatus = table.checkStatus(obj.config.id);
+					switch (obj.event) {
+						case 'addUser':
+							var data = checkStatus.data;
+							layer.alert(JSON.stringify(data));
+							break;
+						case 'deleteAll':
+							var data = checkStatus.data;
+							var flag = true;
+							if (data.length > 0) {
+								for (var i = 0; i < data.length; i++) {
+									if (data[i].state == 'T') {
+										layer.msg("不能删除，存在有效用户！", {
+											icon: 7,
+											time: 2500
+										});
+										flag = false;
+										break;
+									}
+								};
+								if (flag) {
+									$.ajax({
+										url: 'deleteAll',
+										type: 'POST',
+										data: JSON.stringify(data),
+										dataType: 'text', //返回值的类型
+										async: false, //不是异步处理
+										contentType: "application/json;charset=UTF-8",
+										success: function(index) {
+											if (index == 'SUCCESS') {
+												layer.msg("删除成功！", {
+													icon: 6,
+													time: 1000
+												});
+												ptable();
+
+											}
+
+										}
 									});
-								}
-							});
+								};
+							} else {
+								layer.msg("请选择需要删除的对象！", {
+									icon: 7,
+									time: 1000
+								});
+							}
+
+							break;
+						case 'isAll':
+							layer.msg(checkStatus.isAll ? '全选' : '未全选');
+							break;
+					};
+				});
+
+				//监听表格中的工具条
+				table.on('tool(userlist)', function(obj) {
+					var data = obj.data,
+						$ = layui.$;
+					if (obj.event === 'detail') {
+						// layer.msg('ID：' + data.userId + ' 的查看操作');						
+						layer.open({
+							type: 2,
+							//title: '收藏管理 (考生姓名：张无忌)',
+							title: '角色维护页面 <span style="color: green; font-size: large;" >' + '(用户姓名：' + data.username + ')' +
+								'</span>', //将姓名设置为红色
+							shadeClose: true, //弹出框之外的地方是否可以点击
+							offset: '10%',
+							area: ['40%', '60%'],
+							content: 'toAdminMaintainRole?userId=' + data.userId
 						});
+
+
+
+					} else if (obj.event === 'del') {
+						if (data.state == 'F') {
+							layer.confirm('真的删除行么',{skin: 'layui-layer-molv' } ,function() {
+								$.ajax({
+									url: 'deleteUser',
+									type: 'POST',
+									data: {
+										"userId": data.userId
+									},
+									success: function() {
+										layer.msg("删除成功！", {
+											icon: 6,
+											time: 1000
+										});
+										ptable();
+									}
+								});
+							}, function() {
+								layer.msg("取消修改", {
+									icon: 2,
+									time: 2000
+								})
+							});
+						} else {
+							layer.msg("请先将用户置为无效！", {
+								icon: 7,
+								time: 2500
+							});
+						};
+
 					} else if (obj.event === 'edit') {
 						layer.alert('编辑行：<br>' + JSON.stringify(data))
-					}
+					};
 				});
 
 			});

@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
 
 @Mapper
@@ -27,4 +28,10 @@ public interface UsersMapper {
 	void updateStateById(@Param("state")String state,@Param("userId") Integer userId);
 
 	void deleteUserById(Integer userId);
+
+	void deleteUsers(List<User> users);
+	
+	List<User> findAllUserWithRoles();
+
+	List<Role> findUserRolesByUserId(String userId);
 }

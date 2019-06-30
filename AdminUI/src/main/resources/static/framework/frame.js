@@ -57,11 +57,11 @@ function menuCAClick(url,_this){
 	
 	//处理frameMain title名称变化
 	if($(_this).find("i").attr("class") == "iconfont icon-yonghu1"){
-		$("#frameMainTitle span").html('<i class="iconfont icon-xianshiqi"></i>用户管理');
+		$("#frameMainTitle span").html('<i class="iconfont icon-yonghu1"></i>用户管理');
 		return;
 	}
 	if($(_this).text() == "修改密码"){
-		$("#frameMainTitle span").html('<i class="iconfont icon-xianshiqi"></i>'+$(_this).text());
+		$("#frameMainTitle span").html('<i class="iconfont icon-xiugaimima"></i>'+$(_this).text());
 		return;
 	}
 	if($(_this).attr("class") == "menuFA"){

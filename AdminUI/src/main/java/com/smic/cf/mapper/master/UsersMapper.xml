@@ -40,11 +40,6 @@
 	<select id="findUserByUserName" parameterType="String" resultType="com.smic.cf.domain.User">
 		<include refid="selectAll"/>
 		where username = #{username}
-		<!-- <where>
-			<if test="username != null and username != '' ">
-				username = #{username,jdbcType=VARCHAR}
-			</if>
-		</where> -->
 	</select>
 	
 	<!-- 修改密码 -->
@@ -75,6 +70,57 @@
 	<delete id="deleteUserById">
 		delete from sys_user where user_id = #{1}
 	</delete>
+	
+	<!-- 删除多个用户 -->
+	<delete id="deleteUsers" parameterType="java.util.List">
+		delete from sys_user where user_id in
+		<foreach collection="list" item="user" index = "index" open="(" separator="," close=")">
+			#{user.userId}
+		</foreach>
+	</delete>
+	
+	<!-- 多对多关联映射！ -->
+	<resultMap type="com.smic.cf.domain.User" id="queryUserWithRole">
+		<id property="userId" column="user_id"/>
+		<result property="username" column="username"/>
+		<result property="password" column="password"/>
+		<result property="state" column="state"/>
+		<collection property="roles" ofType="com.smic.cf.domain.Role">
+			<id property="roleId" column="role_id"/>
+			<result property="rolename" column="role_name"/>
+		</collection>
+	</resultMap>
+	
+	
+	<!-- 查询所有用户的所有角色 -->
+	<select id="findAllUserWithRoles" resultMap="queryUserWithRole">
+		
+		SELECT 
+			a.user_id,a.username,a.password,a.state,c.role_id,c.role_name
+		FROM 
+			sys_user a, sys_user_role b , sys_role c
+		where 
+			a.user_id = b.user_id and b.role_id = c.role_id
+	
+	</select>
+	
+	
+	<!-- 配置一对多的映射关系 -->
+	<resultMap type="com.smic.cf.domain.Role" id="queryRolesWithUserID">
+		<id property="roleId" column="role_id"/>
+		<result property="rolename" column="role_name"/>
+	</resultMap>
+	
+	<!-- 查询用户角色 -->
+	<select id="findUserRolesByUserId" parameterType="String" resultMap="queryRolesWithUserID">
+		SELECT 
+			c.role_id,c.role_name
+		FROM 
+			sys_user a, sys_user_role b , sys_role c
+		where 
+			a.user_id = #{1} and a.user_id = b.user_id and b.role_id = c.role_id 
+	</select>
+	
 	
 </mapper>
  

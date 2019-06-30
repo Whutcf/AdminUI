@@ -63,6 +63,7 @@ public class UserController {
 	
 	@RequestMapping("/modifyPassword")
 	public String modifyPassword(Model model,HttpServletRequest request) {
+		log.info("修改用户密码！");
 		String oldPassword = request.getParameter("oldpassword");
 		String newPassword = request.getParameter("password");
 		Integer userid = (Integer) request.getSession().getAttribute("userid");
@@ -82,15 +83,16 @@ public class UserController {
 	@RequestMapping("/checkUserName")
 	@ResponseBody
 	public String checkUserName(Model model,@RequestParam("username")String username) {
+		log.info("验证用户名是否存在！");
 		User user = usersService.findUserByUsername(username);
 		if(ObjectUtils.isEmpty(user)) {
 			log.info("用户名不存在，请注册帐号！");
 			model.addAttribute("username", username);
 			model.addAttribute("nameNotExist",true);
 			model.addAttribute("error", "用户名不存在，请注册帐号！");
-			System.out.println(model.toString());
 			return "SUCCESS";
 		}
+		log.info("用户名存在！");
 		return null;
 	}
 	

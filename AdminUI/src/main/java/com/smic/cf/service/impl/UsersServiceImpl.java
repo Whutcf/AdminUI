@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
 import com.smic.cf.mapper.master.UsersMapper;
 import com.smic.cf.service.UsersService;
@@ -78,6 +79,24 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public void deleteUserById(Integer userId) {
 		usersMapper.deleteUserById(userId);
+	}
+
+	@Override
+	public void deleteUesrs(List<User> users) {
+		usersMapper.deleteUsers(users);
+		
+	}
+
+	@Override
+	public List<User> findAllUserWithRoles() {
+
+		return usersMapper.findAllUserWithRoles();
+	}
+
+	@Override
+	public List<Role> findUserRolesByUserId(String userId) {
+		
+		return usersMapper.findUserRolesByUserId(userId);
 	}
 
 }
