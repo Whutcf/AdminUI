@@ -42,26 +42,20 @@
 		<script type="text/html" id="toolbarModify">
 			<div class="layui-btn-container">
 				<button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
-				<button class="layui-btn layui-btn-sm" lay-event="deleteAll">删除选中行数据</button>
-				<button class="layui-btn layui-btn-sm" lay-event="isAll">是否全选</button>
 			</div>
-		</script>
-		<!--行内工具栏-->
-		<script type="text/html" id="modifyTable">
-			<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
 		</script>
 
 		<script>
+			
 			layui.use(['table', 'form'], function() {
 				var table = layui.table,
 					form = layui.form;
 				var userId = $("#userId").val();
-				
-				console.log(userId);
+
 				ptable = function() {
 					table.render({
 						elem: '#rolelist',
-						url: 'findUserRolesByUserId?userId='+userId,
+						url: 'findUnAddedRolesByUserId?userId='+userId,
 						toolbar: '#toolbarModify',
 						title: '用户角色表',
 						method: 'GET',
@@ -79,10 +73,10 @@
 								title: '角色名',
 								// width: 120
 							},{
-								title: '角色编辑',
-								// width: 200,
-								align: 'center',
-								toolbar: '#modifyTable'
+								field:'users',
+								title:'用户ID',
+								templet: '<div>{{d.users.userId}}</div>',
+								 hide:true
 							}]
 						]
 					});
@@ -95,84 +89,38 @@
 				//头工具栏事件
 				table.on('toolbar(rolelist)', function(obj) {
 					var checkStatus = table.checkStatus(obj.config.id);
-					switch (obj.event) {
-						case 'add':
-								layer.open({
-									type:2,
-									area:['300px','300px'],
-									title:'添加角色',
-									shade:0.6,
-									anim:2,
-									content:'toAddminAddRoles?userId='+userId,
-									yes : function(layero,index) {
-										alert(1111);
-										$(layero).find("input").each(function(i, v) {
-											alert($(v).text());
-										});
-										layer.close(index);
-									}
-								});
-								break;
-						case 'deleteAll':
-							var data = checkStatus.data;
-							if (data.length > 0) {
-								$.ajax({
-									url: 'deleteAll',
-									type: 'POST',
-									data: JSON.stringify(data),
-									contentType: "application/json;charset=UTF-8",
-									success: function() {
-										layer.msg("删除成功！", {
+					var data = checkStatus.data;
+					
+					layer.alert(JSON.stringify(data));
+					if(obj.event='add'){
+						if (data.length > 0) {
+							$.ajax({
+								url: 'addRoles',
+								type: 'POST',
+								data: JSON.stringify(data),
+								contentType: "application/json;charset=UTF-8",
+								success: function(index) {
+									if(index=='SUCCESS'){
+										layer.msg("添加成功！", {
 											icon: 6,
 											time: 1000
 										});
-										ptable();
+										//成功后关闭当前页面
+										var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+										parent.layer.close(index); 
 									}
-								});
-							} else {
-								layer.msg("请选择需要删除的对象！", {
-									icon: 7,
-									time: 1000
-								});
-							}
-
-							break;
-						case 'isAll':
-							layer.msg(checkStatus.isAll ? '全选' : '未全选');
-							break;
-					};
-				});
-
-				//监听表格中的工具条
-				table.on('tool(rolelist)', function(obj) {
-					var data = obj.data,
-						$ = layui.$,
-						userId = $("#userId").val();
-					
-						if (obj.event === 'del') {
-						layer.confirm('真的删除行么', function() {
-							$.ajax({
-								url: 'deleteRole',
-								type: 'POST',
-								data: {
-									"roleId": data.userId
-								},
-								success: function() {
-									layer.msg("删除成功！", {
-										icon: 6,
-										time: 1000
-									});
-									ptable();
+									
 								}
 							});
-						}, function() {
-							layer.msg("取消修改", {
-								icon: 2,
-								time: 2000
-							})
-						});
-					};
+						} else {
+							layer.msg("请选择需要添加的角色！", {
+								icon: 7,
+								time: 1000
+							});
+						}
+					}
 				});
+
 
 			});
 		</script>

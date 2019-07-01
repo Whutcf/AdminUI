@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
 import com.smic.cf.service.UsersService;
@@ -127,7 +128,33 @@ public class AdminController {
 		return roles;
 	}
 	
+	@RequestMapping("/toAddminAddRoles")
+	public String toAddminAddRoles(String userId,Model model) {
+		log.info("进入管理员添加角色页面！");
+		model.addAttribute("userId", userId);
+		return "admin/admin_add_roles";
+	}
 	
+	@RequestMapping("/findUnAddedRolesByUserId")
+	@ResponseBody
+	public String findUnAddedRolesByUserId(@RequestParam("userId")Integer userId) {
+		log.info("查询当前用户为添加的角色信息！");
+		List<Role> roleList = usersService.findUnAddedRolesByUserId(userId);
+		Map<String, Object> roles = new HashMap<String, Object>(16);
+		roles.put("code", 0);
+		roles.put("data", roleList);
+		log.info("返回未添加的用户角色信息！");
+		return JSON.toJSONString(roles);
+	}
+	
+	@RequestMapping("/addRoles")
+	@ResponseBody
+	public String addRoles(@RequestBody List<Role> roles) {
+		log.info("为用户添加角色！");
+		usersService.addRoles(roles);
+		log.info("为用户添加角色！");
+		return "SUCCESS";
+	}
 	
 	
 	

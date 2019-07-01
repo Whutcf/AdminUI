@@ -27,4 +27,8 @@ public interface UsersService {
 	void deleteUesrs(List<User> users);
 
 	List<Role> findUserRolesByUserId(String userId);
+
+	List<Role> findUnAddedRolesByUserId(Integer userId);
+
+	void addRoles(List<Role> roles);
 }

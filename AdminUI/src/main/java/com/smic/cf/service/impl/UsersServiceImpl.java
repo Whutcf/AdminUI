@@ -1,5 +1,6 @@
 package com.smic.cf.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -97,6 +98,35 @@ public class UsersServiceImpl implements UsersService {
 	public List<Role> findUserRolesByUserId(String userId) {
 		
 		return usersMapper.findUserRolesByUserId(userId);
+	}
+
+	@Override
+	public List<Role> findUnAddedRolesByUserId(Integer userId) {
+		List<Role> roles = usersMapper.findUnAddedRolesByUserId(userId);
+		if(roles.isEmpty()) {
+			log.info("当前用户没有角色！");
+			List<Role> roles2 = usersMapper.findAllRoles();
+			for (Role role : roles2) {
+				User user = new User();
+				user.setUserId(userId);
+				ArrayList<User> users = new ArrayList<>();
+				users.add(user);
+				role.setUsers(users);
+			}
+			return	roles2;
+		}
+		return roles;
+	}
+
+	@Override
+	public void addRoles(List<Role> roles) {
+		for (Role role : roles) {
+			ArrayList<User> users = role.getUsers();
+			User user = users.get(0);
+			usersMapper.insertRoles(role.getRoleId(),user.getUserId());
+			log.info("成功添加角色"+role.getRolename());
+		}
+		
 	}
 
 }

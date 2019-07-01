@@ -34,4 +34,10 @@ public interface UsersMapper {
 	List<User> findAllUserWithRoles();
 
 	List<Role> findUserRolesByUserId(String userId);
+
+	List<Role> findUnAddedRolesByUserId(@Param("userId") Integer userId);
+
+	void insertRoles(@Param("roleId")Integer roleId, @Param("userId")Integer userId);
+
+	List<Role> findAllRoles();
 }
