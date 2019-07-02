@@ -53,7 +53,7 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public void addUser(String username, String password, String state) {
 		log.info("处理注册用户！");
-		HashMap<String, String> userMap = new HashMap<>();
+		HashMap<String, String> userMap = new HashMap<>(16);
 		userMap.put("username", username);
 		userMap.put("password", password);
 		userMap.put("state", state);
@@ -95,16 +95,20 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	@Override
-	public List<Role> findUserRolesByUserId(String userId) {
+	public List<Role> findUserRolesByUserId(Integer userId) {
 		
 		return usersMapper.findUserRolesByUserId(userId);
 	}
 
 	@Override
 	public List<Role> findUnAddedRolesByUserId(Integer userId) {
-		List<Role> roles = usersMapper.findUnAddedRolesByUserId(userId);
-		if(roles.isEmpty()) {
-			log.info("当前用户没有角色！");
+		List<Role> roles = usersMapper.findUnAddedRolesByUserId(userId);//查询未添加的角色
+		List<Role> existRoles = usersMapper.findUserRolesByUserId(userId);//查询已添加的角色
+		int rolesCount = usersMapper.countRols();
+		log.info("查询角色表当前的角色数是："+rolesCount);
+		log.info("用户已经拥有的角色数是："+existRoles.size());
+		if(roles.size()==rolesCount || (roles.size()==existRoles.size() && roles.size()==0)) {
+			log.info("当前用户未添加角色！");
 			List<Role> roles2 = usersMapper.findAllRoles();
 			for (Role role : roles2) {
 				User user = new User();
@@ -114,6 +118,10 @@ public class UsersServiceImpl implements UsersService {
 				role.setUsers(users);
 			}
 			return	roles2;
+		}
+		if(roles.isEmpty()) {
+			log.info("当前用户无需添加角色！");
+			return null;
 		}
 		return roles;
 	}
@@ -125,6 +133,21 @@ public class UsersServiceImpl implements UsersService {
 			User user = users.get(0);
 			usersMapper.insertRoles(role.getRoleId(),user.getUserId());
 			log.info("成功添加角色"+role.getRolename());
+		}
+		
+	}
+
+	@Override
+	public void deleteRole(Integer roleId, Integer userId) {
+		usersMapper.deleteRole(roleId,userId);		
+	}
+
+	@Override
+	public void deleteRoles(List<Role> roles) {
+		for (Role role : roles) {
+			ArrayList<User> users = role.getUsers();
+			User user = users.get(0);
+			usersMapper.deleteRole(role.getRoleId(), user.getUserId());
 		}
 		
 	}

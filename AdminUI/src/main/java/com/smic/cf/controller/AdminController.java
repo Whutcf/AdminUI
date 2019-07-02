@@ -118,7 +118,7 @@ public class AdminController {
 	
 	@RequestMapping("/findUserRolesByUserId")
 	@ResponseBody
-	public Map<String,Object> findUserRolesByUserId(@RequestParam("userId")String userId) {
+	public Map<String,Object> findUserRolesByUserId(@RequestParam("userId")Integer userId) {
 		log.info("查询用户的角色信息！");
 		List<Role> roleList = usersService.findUserRolesByUserId(userId);
 		Map<String, Object> roles = new HashMap<String, Object>(16);
@@ -156,6 +156,23 @@ public class AdminController {
 		return "SUCCESS";
 	}
 	
+	@RequestMapping("/deleteRole")
+	@ResponseBody
+	public String deleteRole(@RequestParam("roleId") Integer roleId,@RequestParam("userId") Integer userId) {
+		log.info("为用户删除某个角色！");
+		usersService.deleteRole(roleId,userId);
+		log.info("成功为用户删除某个角色！");
+		return "SUCCESS";
+	}
+	
+	@RequestMapping("/deleteRoles")
+	@ResponseBody
+	public String deleteRoles(@RequestBody List<Role> roles) {
+		log.info("为用户删除多个角色！");
+		usersService.deleteRoles(roles);
+		log.info("成功为用户删除多个角色！");
+		return "SUCCESS";
+	}
 	
 	
 }
