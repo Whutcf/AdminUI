@@ -44,4 +44,8 @@ public interface UsersMapper {
 	void deleteRole(Integer roleId, Integer userId);
 
 	int countRols();
+
+	int updateUserInfo(User user);
+
+	void deleteUserRoles(Integer userId);
 }

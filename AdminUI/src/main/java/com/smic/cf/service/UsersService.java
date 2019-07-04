@@ -35,4 +35,6 @@ public interface UsersService {
 	void deleteRole(Integer roleId, Integer userId);
 
 	void deleteRoles(List<Role> roles);
+
+	int updateUserInfo(User user);
 }

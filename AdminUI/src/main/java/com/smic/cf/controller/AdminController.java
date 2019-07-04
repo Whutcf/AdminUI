@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +27,7 @@ public class AdminController {
 
 	@Autowired
 	private UsersService usersService;
-	
+
 	@RequestMapping("/toAdminMaintain")
 	public String toAdminMaintain(Model model) {
 		log.info("进入管理员维护页面！");
@@ -38,7 +39,7 @@ public class AdminController {
 		model.addAttribute("userList", userList);
 		return "admin/admin_maintain";
 	}
-	
+
 	/**
 	 * 页面跳转的新方法，进入页面后会直接加载用户信息调用 /showUserListWithRoles
 	 * 
@@ -49,10 +50,10 @@ public class AdminController {
 		log.info("进入管理员维护页面2！");
 		return "admin/admin_maintain2";
 	}
-	
+
 	@RequestMapping("/showUserList")
 	@ResponseBody
-	public Map<String, Object> userList(){
+	public Map<String, Object> userList() {
 		log.info("查询所有用户信息给前台！");
 		List<User> userList = usersService.findAllUsers();
 		Map<String, Object> users = new HashMap<String, Object>(16);
@@ -60,10 +61,10 @@ public class AdminController {
 		users.put("data", userList);
 		return users;
 	}
-	
+
 	@RequestMapping("/showUserListWithRoles")
 	@ResponseBody
-	public Map<String, Object> userListWithRoles(){
+	public Map<String, Object> userListWithRoles() {
 		log.info("查询用户信息（包含角色信息）给前台！");
 		List<User> userListWithRoles = usersService.findAllUserWithRoles();
 		Map<String, Object> users = new HashMap<String, Object>(16);
@@ -72,7 +73,7 @@ public class AdminController {
 		log.info("传送用户信息给前台！");
 		return users;
 	}
-	
+
 	@RequestMapping("/changeState")
 	@ResponseBody
 	public String changeState(@RequestParam Map<String, String> jsonMap) {
@@ -81,23 +82,23 @@ public class AdminController {
 		String strUserId = jsonMap.get("userId").toString();
 		Integer userId = (Integer) Integer.parseInt(strUserId);
 		if ("true".equalsIgnoreCase(state)) {
-			usersService.updateStateById("T",userId);
+			usersService.updateStateById("T", userId);
 			log.info("用户的状态被修改为有效！");
-		}else {
+		} else {
 			usersService.updateStateById("F", userId);
 			log.info("用户的状态被修改为无效！");
 		}
 		return "success";
 	}
-	
+
 	@RequestMapping("/deleteUser")
 	@ResponseBody
-	public String deleteUser(@RequestParam("userId")Integer userId) {
+	public String deleteUser(@RequestParam("userId") Integer userId) {
 		log.info("删除用户！");
 		usersService.deleteUserById(userId);
 		return "success";
 	}
-	
+
 	@RequestMapping("/deleteAll")
 	@ResponseBody
 	public String deleteAll(@RequestBody List<User> users) {
@@ -106,19 +107,36 @@ public class AdminController {
 		log.info("用户删除成功！");
 		return "SUCCESS";
 	}
-	
-	/*用户角色处理模块！*/
-	
+
+	@RequestMapping("/toAdminMaintainUser")
+	public String toAdminMaintainUser() {
+		log.info("进入管理员添加角色页面！");
+		return "admin/admin_maintain_user";
+	}
+
+	@RequestMapping("/updateUserInfo")
+	@ResponseBody
+	@CrossOrigin
+	public String updateUserInfo(@RequestBody User user) {
+		log.info("更新用户信息！");
+		int i = usersService.updateUserInfo(user);
+		System.out.println(i);
+		log.info("用户信息更新成功！");
+		return "SUCCESS";
+	}
+
+	/* 用户角色处理模块！ */
+
 	@RequestMapping("/toAdminMaintainRole")
-	public String toAdminMaintainRoles(String userId,Model model) {
+	public String toAdminMaintainRoles(String userId, Model model) {
 		log.info("进入管理员角色维护页面！");
 		model.addAttribute("userId", userId);
 		return "admin/admin_maintain_roles";
 	}
-	
+
 	@RequestMapping("/findUserRolesByUserId")
 	@ResponseBody
-	public Map<String,Object> findUserRolesByUserId(@RequestParam("userId")Integer userId) {
+	public Map<String, Object> findUserRolesByUserId(@RequestParam("userId") Integer userId) {
 		log.info("查询用户的角色信息！");
 		List<Role> roleList = usersService.findUserRolesByUserId(userId);
 		Map<String, Object> roles = new HashMap<String, Object>(16);
@@ -127,17 +145,17 @@ public class AdminController {
 		log.info("返回用户角色信息！");
 		return roles;
 	}
-	
+
 	@RequestMapping("/toAddminAddRoles")
-	public String toAddminAddRoles(String userId,Model model) {
+	public String toAddminAddRoles(String userId, Model model) {
 		log.info("进入管理员添加角色页面！");
 		model.addAttribute("userId", userId);
 		return "admin/admin_add_roles";
 	}
-	
+
 	@RequestMapping("/findUnAddedRolesByUserId")
 	@ResponseBody
-	public String findUnAddedRolesByUserId(@RequestParam("userId")Integer userId) {
+	public String findUnAddedRolesByUserId(@RequestParam("userId") Integer userId) {
 		log.info("查询当前用户为添加的角色信息！");
 		List<Role> roleList = usersService.findUnAddedRolesByUserId(userId);
 		Map<String, Object> roles = new HashMap<String, Object>(16);
@@ -146,7 +164,7 @@ public class AdminController {
 		log.info("返回未添加的用户角色信息！");
 		return JSON.toJSONString(roles);
 	}
-	
+
 	@RequestMapping("/addRoles")
 	@ResponseBody
 	public String addRoles(@RequestBody List<Role> roles) {
@@ -155,16 +173,16 @@ public class AdminController {
 		log.info("为用户添加角色！");
 		return "SUCCESS";
 	}
-	
+
 	@RequestMapping("/deleteRole")
 	@ResponseBody
-	public String deleteRole(@RequestParam("roleId") Integer roleId,@RequestParam("userId") Integer userId) {
+	public String deleteRole(@RequestParam("roleId") Integer roleId, @RequestParam("userId") Integer userId) {
 		log.info("为用户删除某个角色！");
-		usersService.deleteRole(roleId,userId);
+		usersService.deleteRole(roleId, userId);
 		log.info("成功为用户删除某个角色！");
 		return "SUCCESS";
 	}
-	
+
 	@RequestMapping("/deleteRoles")
 	@ResponseBody
 	public String deleteRoles(@RequestBody List<Role> roles) {
@@ -173,6 +191,5 @@ public class AdminController {
 		log.info("成功为用户删除多个角色！");
 		return "SUCCESS";
 	}
-	
-	
+
 }

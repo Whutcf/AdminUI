@@ -79,13 +79,21 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public void deleteUserById(Integer userId) {
+		log.info("删除用户角色信息！");
+		usersMapper.deleteUserRoles(userId);
+		log.info("删除用户！");
 		usersMapper.deleteUserById(userId);
 	}
 
 	@Override
 	public void deleteUesrs(List<User> users) {
-		usersMapper.deleteUsers(users);
-		
+		for (User user : users) {
+			log.info("删除用户"+user.getUsername()+"的所有角色");
+			usersMapper.deleteUserRoles(user.getUserId());
+			log.info("删除用户"+user.getUsername()+"！");
+			usersMapper.deleteUserById(user.getUserId());
+		}
+//		usersMapper.deleteUsers(users); 舍弃该方法，为了在删除用户的同时能删除该用户的角色
 	}
 
 	@Override
@@ -149,6 +157,14 @@ public class UsersServiceImpl implements UsersService {
 			User user = users.get(0);
 			usersMapper.deleteRole(role.getRoleId(), user.getUserId());
 		}
+		
+	}
+
+	@Override
+	public int updateUserInfo(User user) {
+		
+		int i = usersMapper.updateUserInfo(user);
+		return i;
 		
 	}
 

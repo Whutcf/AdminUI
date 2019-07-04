@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 public class UserController {
 	
-	private static String STATE = "disable";
+	private static String STATE = "F";
 	
 	@Autowired
 	private UsersService usersService;
@@ -51,6 +51,7 @@ public class UserController {
 				}
 				request.getSession().setAttribute("userid", user.getUserId());
 				request.getSession().setAttribute("userinfo", user);
+				log.info("进入主页！");
 				return "frame";
 			}
 		}
@@ -71,6 +72,7 @@ public class UserController {
 		if(!initialPassword.equalsIgnoreCase(oldPassword)) {
 			model.addAttribute("verifyFailure",true);
 			model.addAttribute("error", "密码不正确！");
+			log.info("返回修改密码页面！");
  			return "tgls/modify_password";
 		}
 		usersService.updatePasswordById(userid,newPassword);
@@ -107,10 +109,11 @@ public class UserController {
 			model.addAttribute("username", username);
 			model.addAttribute("verifyFailure",true);
 			model.addAttribute("error", "用户名已存在！");
+			log.info("用户名已存在!");
 			return "regist";
 		}
 		usersService.addUser(username,password,state);
-		log.info("添加用户成功");
+		log.info("用户注册成功！");
 		redirectAttributes.addAttribute("hasmsg", true);
 		redirectAttributes.addAttribute("msg", "您已注册成功，请登录！");
 		return "redirect:/toLogin";
@@ -118,6 +121,7 @@ public class UserController {
 	
 	@RequestMapping("/logout")
 	public  String logout(HttpServletRequest request) {
+		log.info("登出系统！");
 		request.getSession().removeAttribute("userinfo");
 		return "login";
 	}
