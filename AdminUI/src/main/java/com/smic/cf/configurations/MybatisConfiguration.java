@@ -1,0 +1,28 @@
+package com.smic.cf.configurations;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+
+/**
+ * 
+ * @Description: 
+ * @author cai feng
+ * @date 2019年7月24日
+ */
+@Configuration
+public class MybatisConfiguration {
+
+	 /*
+	    * 分页插件，自动识别数据库类型
+	    * 多租户，请参考官网【插件扩展】
+	    */
+	    @Bean
+	    public PaginationInterceptor paginationInterceptor() {
+	    	PaginationInterceptor page = new PaginationInterceptor();
+	    	//设置方言
+	    	page.setDialectType("mysql");
+	        return page;
+	    }
+}

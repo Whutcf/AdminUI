@@ -5,14 +5,14 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
 
 @Mapper
-@Repository
-public interface UsersMapper {
+public interface UsersMapper extends BaseMapper<User> {
+	
 	User verifyUser(String username,String password);
 
 	String findUserPasswordById(Integer userid);
@@ -23,11 +23,9 @@ public interface UsersMapper {
 
 	User findUserByUserName(String username);
 
-	List<User> findAllUsers();
 
 	void updateStateById(@Param("state")String state,@Param("userId") Integer userId);
 
-	void deleteUserById(Integer userId);
 
 	void deleteUsers(List<User> users);
 	
@@ -45,7 +43,14 @@ public interface UsersMapper {
 
 	int countRols();
 
-	int updateUserInfo(User user);
 
 	void deleteUserRoles(Integer userId);
+	
+	/*
+	 * 被MybatisPlus替换掉的方法* 
+	 */
+//	List<User> findAllUsers();
+//	void deleteUserById(Integer userId);
+//	int updateUserInfo(User user);
+	
 }

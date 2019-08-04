@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
 import com.smic.cf.mapper.master.UsersMapper;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
  * @ClassName UsersServiceImpl
- * @Description TODO(这里用一句话描述这个类的作用) 
+ * @Description TODO(这里用一句话描述这个类的作用)
  * @author cai feng
  * @date 2019年6月21日
  *
@@ -30,11 +31,16 @@ public class UsersServiceImpl implements UsersService {
 
 	@Autowired
 	private UsersMapper usersMapper;
-	
+
 	@Override
 	public User verifyUser(String username, String password) {
 		log.info("进入UsersService层:verifyUser!");
-		return usersMapper.verifyUser(username, password);
+//		return usersMapper.verifyUser(username, password); 使用MybatisPlus替换
+		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("username", username);
+		queryWrapper.eq("password", password);
+		User user = usersMapper.selectOne(queryWrapper);
+		return user;
 	}
 
 	@Override
@@ -45,9 +51,9 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	@Override
-	public void updatePasswordById(Integer userid,String newPassword) {
+	public void updatePasswordById(Integer userid, String newPassword) {
 		log.info("修改密码！");
-		usersMapper.updatePasswordById(userid,newPassword);
+		usersMapper.updatePasswordById(userid, newPassword);
 	}
 
 	@Override
@@ -62,19 +68,19 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public User findUserByUsername(String username) {
-		 
+
 		return usersMapper.findUserByUserName(username);
 	}
 
 	@Override
 	public List<User> findAllUsers() {
-		 
-		return usersMapper.findAllUsers();
+		// return usersMapper.findAllUsers(); 使用MybatisPlus替换
+		return usersMapper.selectList(null);
 	}
 
 	@Override
 	public void updateStateById(String state, Integer userId) {
-		usersMapper.updateStateById(state,userId);
+		usersMapper.updateStateById(state, userId);
 	}
 
 	@Override
@@ -82,16 +88,17 @@ public class UsersServiceImpl implements UsersService {
 		log.info("删除用户角色信息！");
 		usersMapper.deleteUserRoles(userId);
 		log.info("删除用户！");
-		usersMapper.deleteUserById(userId);
+//		usersMapper.deleteUserById(userId);
+		usersMapper.deleteById(userId);
 	}
 
 	@Override
-	public void deleteUesrs(List<User> users) {
+	public void deleteUsers(List<User> users) {
 		for (User user : users) {
-			log.info("删除用户"+user.getUsername()+"的所有角色");
+			log.info("删除用户" + user.getUsername() + "的所有角色");
 			usersMapper.deleteUserRoles(user.getUserId());
-			log.info("删除用户"+user.getUsername()+"！");
-			usersMapper.deleteUserById(user.getUserId());
+			log.info("删除用户" + user.getUsername() + "！");
+			usersMapper.deleteById(user.getUserId());
 		}
 //		usersMapper.deleteUsers(users); 舍弃该方法，为了在删除用户的同时能删除该用户的角色
 	}
@@ -104,18 +111,18 @@ public class UsersServiceImpl implements UsersService {
 
 	@Override
 	public List<Role> findUserRolesByUserId(Integer userId) {
-		
+
 		return usersMapper.findUserRolesByUserId(userId);
 	}
 
 	@Override
 	public List<Role> findUnAddedRolesByUserId(Integer userId) {
-		List<Role> roles = usersMapper.findUnAddedRolesByUserId(userId);//查询未添加的角色
-		List<Role> existRoles = usersMapper.findUserRolesByUserId(userId);//查询已添加的角色
+		List<Role> roles = usersMapper.findUnAddedRolesByUserId(userId);// 查询未添加的角色
+		List<Role> existRoles = usersMapper.findUserRolesByUserId(userId);// 查询已添加的角色
 		int rolesCount = usersMapper.countRols();
-		log.info("查询角色表当前的角色数是："+rolesCount);
-		log.info("用户已经拥有的角色数是："+existRoles.size());
-		if(roles.size()==rolesCount || (roles.size()==existRoles.size() && roles.size()==0)) {
+		log.info("查询角色表当前的角色数是：" + rolesCount);
+		log.info("用户已经拥有的角色数是：" + existRoles.size());
+		if (roles.size() == rolesCount || (roles.size() == existRoles.size() && roles.size() == 0)) {
 			log.info("当前用户未添加角色！");
 			List<Role> roles2 = usersMapper.findAllRoles();
 			for (Role role : roles2) {
@@ -125,9 +132,9 @@ public class UsersServiceImpl implements UsersService {
 				users.add(user);
 				role.setUsers(users);
 			}
-			return	roles2;
+			return roles2;
 		}
-		if(roles.isEmpty()) {
+		if (roles.isEmpty()) {
 			log.info("当前用户无需添加角色！");
 			return null;
 		}
@@ -139,15 +146,15 @@ public class UsersServiceImpl implements UsersService {
 		for (Role role : roles) {
 			ArrayList<User> users = role.getUsers();
 			User user = users.get(0);
-			usersMapper.insertRoles(role.getRoleId(),user.getUserId());
-			log.info("成功添加角色"+role.getRolename());
+			usersMapper.insertRoles(role.getRoleId(), user.getUserId());
+			log.info("成功添加角色" + role.getRolename());
 		}
-		
+
 	}
 
 	@Override
 	public void deleteRole(Integer roleId, Integer userId) {
-		usersMapper.deleteRole(roleId,userId);		
+		usersMapper.deleteRole(roleId, userId);
 	}
 
 	@Override
@@ -157,15 +164,18 @@ public class UsersServiceImpl implements UsersService {
 			User user = users.get(0);
 			usersMapper.deleteRole(role.getRoleId(), user.getUserId());
 		}
-		
+
 	}
 
 	@Override
 	public int updateUserInfo(User user) {
-		
-		int i = usersMapper.updateUserInfo(user);
+
+//		int i = usersMapper.updateUserInfo(user);
+		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("user_id", user.getUserId());
+		int i = usersMapper.update(user, queryWrapper);
 		return i;
-		
+
 	}
 
 }

@@ -4,8 +4,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
+
+
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.baomidou.mybatisplus.autoconfigure.SpringBootVFS;
+import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 
 /**
  * 
@@ -28,7 +30,6 @@ import com.alibaba.druid.pool.DruidDataSource;
 public class MasterDataSourceConfig {
 
 	public static final String PACKAGE = "com.smic.cf.mapper.master";
-//	public static final String MAPPER_LOCATION = "classpath:mapper/master/*.xml";
 
 	@Value("${spring.datasource.url}")
 	private String url;
@@ -68,7 +69,7 @@ public class MasterDataSourceConfig {
 	private String connectionProperties;
 
 	@Bean(name = "masterDataSource")
-	@Primary // 标志这个 Bean 如果在多个同类 Bean候选时，该 Bean优先被考虑。多数据源配置的时候注意，必须要有一个主数据源，用@Primary标志该Bean 
+	@Primary // 标志这个 Bean 如果在多个同类 Bean候选时，该 Bean优先被考虑。多数据源配置的时候注意，必须要有一个主数据源，用@Primary标志该Bean
 	public DataSource masterDataSource() {
 		DruidDataSource dataSource = new DruidDataSource();
 		dataSource.setUrl(url);
@@ -103,15 +104,28 @@ public class MasterDataSourceConfig {
 		return new DataSourceTransactionManager(masterDataSource());
 	}
 
+	
 	@Bean(name = "masterSqlSessionFactory")
 	@Primary
-	public SqlSessionFactory masterSqlSessionFactory(@Qualifier("masterDataSource") DataSource masterDataSource)
+	public MybatisSqlSessionFactoryBean masterSqlSessionFactory(@Qualifier("masterDataSource") DataSource masterDataSource)
 			throws Exception {
-		final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
+		final MybatisSqlSessionFactoryBean sessionFactory = new MybatisSqlSessionFactoryBean(); 
 		sessionFactory.setDataSource(masterDataSource);
-//		sessionFactory.setMapperLocations(
-//				new PathMatchingResourcePatternResolver().getResources(MasterDataSourceConfig.MAPPER_LOCATION));
-		return sessionFactory.getObject();
+		//配置是使MybatisPlus的别名生效
+		sessionFactory.setVfs(SpringBootVFS.class);
+		sessionFactory.setTypeAliasesPackage("com.smic.cf.domain");
+		return sessionFactory;
 	}
+	/*
+	 * 使用MybatisPlus替换
+	 * public SqlSessionFactory masterSqlSessionFactory(@Qualifier("masterDataSource") DataSource masterDataSource)
+			throws Exception {
+		final SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean(); 
+		sessionFactory.setDataSource(masterDataSource);
+		//配置是使MybatisPlus的别名生效
+		sessionFactory.setVfs(SpringBootVFS.class);
+		sessionFactory.setTypeAliasesPackage("com.smic.cf.domain");
+		return sessionFactory.getObject();
+	}*/
 
 }

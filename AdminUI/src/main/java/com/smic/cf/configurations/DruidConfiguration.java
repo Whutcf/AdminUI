@@ -28,7 +28,7 @@ public class DruidConfiguration {
 		// 注册服务
 		ServletRegistrationBean<StatViewServlet> servletRegistrationBean = new ServletRegistrationBean<StatViewServlet>(new StatViewServlet(),"/druid/*");
 		// 白名单(为空表示,所有的都可以访问,多个IP的时候用逗号隔开)
-		servletRegistrationBean.addInitParameter("allow", "127.0.0.1");
+		servletRegistrationBean.addInitParameter("allow", "192.168.1.3,127.0.0.1,192.168.1.8");
 		// IP黑名单 (存在共同时，deny优先于allow)
 		servletRegistrationBean.addInitParameter("deny", "127.0.0.2");
 		// 设置登录的用户名和密码

@@ -24,7 +24,7 @@ public interface UsersService {
 
 	void deleteUserById(Integer userId);
 
-	void deleteUesrs(List<User> users);
+	void deleteUsers(List<User> users);
 
 	List<Role> findUserRolesByUserId(Integer userId);
 

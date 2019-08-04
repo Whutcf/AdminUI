@@ -20,10 +20,18 @@ import com.smic.cf.service.UsersService;
 
 import lombok.extern.slf4j.Slf4j;
 
+
 @Controller
 @RequestMapping("/admin")
 @Slf4j
+/**
+ * AdminUI的admin模块
+ * @author cai feng
+ *
+ */
 public class AdminController {
+	
+	private final String STATE_DEFULT = "true";
 
 	@Autowired
 	private UsersService usersService;
@@ -81,7 +89,7 @@ public class AdminController {
 		String state = jsonMap.get("state").toString();
 		String strUserId = jsonMap.get("userId").toString();
 		Integer userId = (Integer) Integer.parseInt(strUserId);
-		if ("true".equalsIgnoreCase(state)) {
+		if (STATE_DEFULT.equalsIgnoreCase(state)) {
 			usersService.updateStateById("T", userId);
 			log.info("用户的状态被修改为有效！");
 		} else {
@@ -103,7 +111,7 @@ public class AdminController {
 	@ResponseBody
 	public String deleteAll(@RequestBody List<User> users) {
 		log.info("删除多个用户！");
-		usersService.deleteUesrs(users);
+		usersService.deleteUsers(users);
 		log.info("用户删除成功！");
 		return "SUCCESS";
 	}

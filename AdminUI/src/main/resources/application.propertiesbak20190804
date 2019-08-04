@@ -1,5 +1,4 @@
-#server.port=8080
-
+server.port=9080
 # 使spring热部署生效
 #spring.devtools.livereload.enabled=true
 
@@ -16,6 +15,9 @@ spring.thymeleaf.cache=false
 
 spring.mvc.view.prefix=/templates/ 
 spring.mvc.view.suffix=.html
+
+#spring.resources.static-locations=classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+spring.mvc.static-path-pattern=/static/**
 
 
 # datasource 基本配置
@@ -49,3 +51,16 @@ spring.datasource.poolPreparedStatements=true
 spring.datasource.maxPoolPreparedStatementPerConnectionSize=20
 # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
 spring.datasource.connectionProperties=druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
+#MybatisPlus配置
+mybatis-plus.mapper-locations=classpath:/mapper/master/*Mapper.xml
+mybatis-plus.type-aliases-package=com.smic.cf.domain
+#主键类型  AUTO:"数据库ID自增", INPUT:"用户输入ID",ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID"
+mybatis-plus.global-config.db-config.id-type=auto
+mybatis-plus.global-config.db-config.table-prefix=sys_
+mybatis-plus.global-config.db-config.field-strategy=not-null
+#打印sql到控制台
+mybatis-plus.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+
