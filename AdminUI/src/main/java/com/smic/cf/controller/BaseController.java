@@ -41,6 +41,13 @@ public class BaseController {
 		log.info("进入页签切换Table！");
 		return "tgls/base/pages";
 	}
+	
+	@GetMapping("/toMaintain")
+	public String maintainPage() {
+		log.info("页面维护中！");
+		return "maintain";
+	}
+	
 
 
 }

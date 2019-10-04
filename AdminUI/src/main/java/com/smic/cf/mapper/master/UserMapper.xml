@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.smic.cf.mapper.master.UsersMapper">
+<mapper namespace="com.smic.cf.mapper.master.UserMapper">
 	<!-- 使用MybatisPlus 在domain中使用@TableId("user_id")可以替换userResultMap -->
 	<!-- 配置一个映射关系 <resultMap type="User" id="userResultMap"> <id property="userId" 
 		column="user_id"/> </resultMap> -->
@@ -34,13 +34,6 @@
 	<select id="findUserPasswordById" parameterType="Integer"
 		resultType="String">
 		select password from sys_user where user_id = #{userid}
-	</select>
-
-	<!-- 根据用户名查找用户 -->
-	<select id="findUserByUserName" parameterType="String"
-		resultType="User">
-		<include refid="selectAll" />
-		where username = #{username}
 	</select>
 
 	<!-- 修改密码 -->
@@ -92,6 +85,8 @@
 		<result property="username" column="username" />
 		<result property="password" column="password" />
 		<result property="state" column="state" />
+		<result property="createtime" column="createtime" />
+		<result property="updatetime" column="updatetime" />
 		<collection property="roles" ofType="Role">
 			<id property="roleId" column="role_id" />
 			<result property="rolename" column="role_name" />
@@ -107,6 +102,8 @@
 		a.username,
 		a.PASSWORD,
 		a.state,
+		a.createtime,
+		a.updatetime,
 		c.role_id,
 		c.role_name
 		FROM
@@ -121,7 +118,7 @@
 	<!-- 配置一对多的映射关系 -->
 	<resultMap type="Role" id="queryRolesWithUserID">
 		<id property="roleId" column="role_id" />
-		<result property="rolename" column="role_name" />
+		<result property="roleName" column="role_name" />
 		<collection property="users" ofType="User">
 			<id property="userId" column="user_id" />
 		</collection>
@@ -189,5 +186,11 @@
 		where
 		user_id = #{userId}
 	</update> -->
+	<!-- 根据用户名查找用户 -->
+	<!-- <select id="findUserByUserName" parameterType="String"
+		resultType="User">
+		<include refid="selectAll" />
+		where username = #{username}
+	</select> -->
 </mapper>
  

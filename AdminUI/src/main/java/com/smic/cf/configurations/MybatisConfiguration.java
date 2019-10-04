@@ -2,7 +2,6 @@ package com.smic.cf.configurations;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 
 /**
@@ -20,9 +19,11 @@ public class MybatisConfiguration {
 	    */
 	    @Bean
 	    public PaginationInterceptor paginationInterceptor() {
-	    	PaginationInterceptor page = new PaginationInterceptor();
+	    	PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
 	    	//设置方言
-	    	page.setDialectType("mysql");
-	        return page;
+	    	paginationInterceptor.setDialectType("mysql");
+	    	//设置默认单页显示条目数，默认单页显示500条
+	    	paginationInterceptor.setLimit(10);
+	        return paginationInterceptor;
 	    }
 }

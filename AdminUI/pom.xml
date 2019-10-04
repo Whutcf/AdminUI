@@ -31,17 +31,18 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<!-- spring boot 整合MybatisPlus -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>2.0.1</version>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-boot-starter</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2</version>
 		</dependency>
+		
 
 		<!-- 配置mysql -->
 		<dependency>
@@ -114,6 +115,7 @@
 					<fork>true</fork>
 				</configuration>
 			</plugin>
+			
 		</plugins>
 		<!-- 配置将哪些资源文件(静态文件/模板文件/mapper文件)加载到tomcat输出目录里 -->
 		<resources>

@@ -1,5 +1,7 @@
 package com.smic.cf.controller;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.smic.cf.domain.User;
-import com.smic.cf.service.UsersService;
+import com.smic.cf.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +34,7 @@ public class UserController {
 	private static String STATE = "F";
 	
 	@Autowired
-	private UsersService usersService;
+	private UserService usersService;
 	
 	@RequestMapping("/login")
 	public String login(Model model,HttpServletRequest request) {
@@ -104,15 +106,22 @@ public class UserController {
 		String username = request.getParameter("username");
 		String password = request.getParameter("passWord");
 		String state = request.getParameter("state");
-		User user = usersService.findUserByUsername(username);
-		if(!ObjectUtils.isEmpty(user)) {
+		User verifyUser = usersService.findUserByUsername(username);
+		if(!ObjectUtils.isEmpty(verifyUser)) {
 			model.addAttribute("username", username);
 			model.addAttribute("verifyFailure",true);
 			model.addAttribute("error", "用户名已存在！");
 			log.info("用户名已存在!");
 			return "regist";
 		}
-		usersService.addUser(username,password,state);
+		User user = new User();
+		user.setUsername(username);
+		user.setPassword(password);
+		user.setState(state);
+		user.setCreatetime(new Date());
+		user.setUpdatetime(null);
+		usersService.addUser(user);
+		//usersService.addUser(username,password,state);
 		log.info("用户注册成功！");
 		redirectAttributes.addAttribute("hasmsg", true);
 		redirectAttributes.addAttribute("msg", "您已注册成功，请登录！");

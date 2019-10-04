@@ -60,13 +60,6 @@ public class PageController {
 		return "nopermisson";
 	}
 	
-	@GetMapping("/toMaintain")
-	public String maintainPage() {
-		log.info("页面维护中！");
-		return "maintain";
-	}
-	
-	
 	
 	@GetMapping("tgls/toQdAPI")
 	public String toQdAPI() {
@@ -76,7 +69,7 @@ public class PageController {
 
 	@GetMapping("tgls/toIconfont")
 	public String toIconfont() {
-		log.info("进入添加分管页面");
+		log.info("进入图标页面");
 		return "tgls/iconfont";
 	}
 
@@ -91,4 +84,16 @@ public class PageController {
 		log.info("进入分管列表页面");
 		return "tgls/agent/agent_list";
 	}
+	@GetMapping("tgls/print/toOutPrintData")
+	public String toOutPrintData() {
+		log.info("进入打印页面");
+		return "tgls/print/outPrintData";
+	}
+	@GetMapping("tgls/reportForm/toReportForm1")
+	public String toReportForm1() {
+		log.info("进入表单页面1");
+		return "tgls/reportForm/reportForm1";
+	}
+	
+	
 }

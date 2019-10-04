@@ -1,8 +1,11 @@
 package com.smic.cf.controller;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,32 +17,38 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
-import com.smic.cf.service.UsersService;
+import com.smic.cf.service.RoleService;
+import com.smic.cf.service.UserService;
+import com.smic.cf.util.Result;
 
 import lombok.extern.slf4j.Slf4j;
-
 
 @Controller
 @RequestMapping("/admin")
 @Slf4j
 /**
  * AdminUI的admin模块
+ * 
  * @author cai feng
  *
  */
 public class AdminController {
-	
+
 	private final String STATE_DEFULT = "true";
 
 	@Autowired
-	private UsersService usersService;
+	private UserService userService;
+	@Autowired
+	private RoleService roleService;
 
 	@RequestMapping("/toAdminMaintain")
 	public String toAdminMaintain(Model model) {
 		log.info("进入管理员维护页面！");
-		List<User> userList = usersService.findAllUsers();
+		List<User> userList = userService.findAllUsers();
 		System.out.println(userList.size());
 		for (User user : userList) {
 			System.out.println(user.getUserId());
@@ -61,39 +70,51 @@ public class AdminController {
 
 	@RequestMapping("/showUserList")
 	@ResponseBody
-	public Map<String, Object> userList() {
+	public Result<User> userList(
+			@RequestParam(value = "page", required = false, defaultValue = "1") Integer currentPage,
+			@RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
 		log.info("查询所有用户信息给前台！");
-		List<User> userList = usersService.findAllUsers();
-		Map<String, Object> users = new HashMap<String, Object>(16);
-		users.put("code", 0);
-		users.put("data", userList);
-		return users;
+//		修改为分页展示
+//		List<User> userList = userService.findAllUsers();
+//		Map<String, Object> users = new HashMap<String, Object>(16);
+//		users.put("code", 0);
+//		users.put("data", userList);
+		Page<User> page = new Page<>(currentPage,limit,true);
+		IPage<User> iPage = userService.selectPage(page);
+		Result<User> result = new Result<>();
+		result.setData(iPage.getRecords());
+		result.setCode(0);
+		result.setCount((int) iPage.getTotal());
+		log.info("传送用户信息给前台！");
+		return result;
 	}
 
 	@RequestMapping("/showUserListWithRoles")
 	@ResponseBody
-	public Map<String, Object> userListWithRoles() {
+	public Object userListWithRoles() {
 		log.info("查询用户信息（包含角色信息）给前台！");
-		List<User> userListWithRoles = usersService.findAllUserWithRoles();
+		List<User> userListWithRoles = userService.findAllUserWithRoles();
 		Map<String, Object> users = new HashMap<String, Object>(16);
 		users.put("code", 0);
 		users.put("data", userListWithRoles);
-		log.info("传送用户信息给前台！");
-		return users;
+		log.info("传送用户信息（包含角色信息）给前台！");
+		return JSON.toJSON(users);
 	}
 
 	@RequestMapping("/changeState")
 	@ResponseBody
-	public String changeState(@RequestParam Map<String, String> jsonMap) {
+	public String changeState(@RequestParam Map<String, String> jsonMap,HttpServletRequest request) {
 		log.info("修改用户的状态！");
 		String state = jsonMap.get("state").toString();
 		String strUserId = jsonMap.get("userId").toString();
+		User userInfo = (User) request.getSession().getAttribute("userinfo");
+		String username = userInfo.getUsername();
 		Integer userId = (Integer) Integer.parseInt(strUserId);
 		if (STATE_DEFULT.equalsIgnoreCase(state)) {
-			usersService.updateStateById("T", userId);
+			userService.updateStateById("T", userId, username);
 			log.info("用户的状态被修改为有效！");
 		} else {
-			usersService.updateStateById("F", userId);
+			userService.updateStateById("F", userId, username);
 			log.info("用户的状态被修改为无效！");
 		}
 		return "success";
@@ -103,7 +124,7 @@ public class AdminController {
 	@ResponseBody
 	public String deleteUser(@RequestParam("userId") Integer userId) {
 		log.info("删除用户！");
-		usersService.deleteUserById(userId);
+		userService.deleteUserById(userId);
 		return "success";
 	}
 
@@ -111,7 +132,7 @@ public class AdminController {
 	@ResponseBody
 	public String deleteAll(@RequestBody List<User> users) {
 		log.info("删除多个用户！");
-		usersService.deleteUsers(users);
+		userService.deleteUsers(users);
 		log.info("用户删除成功！");
 		return "SUCCESS";
 	}
@@ -125,9 +146,12 @@ public class AdminController {
 	@RequestMapping("/updateUserInfo")
 	@ResponseBody
 	@CrossOrigin
-	public String updateUserInfo(@RequestBody User user) {
+	public String updateUserInfo(@RequestBody User user,HttpServletRequest request) {
 		log.info("更新用户信息！");
-		int i = usersService.updateUserInfo(user);
+		User userinfo = (User) request.getSession().getAttribute("userinfo");
+		user.setUpdatePerson(userinfo.getUsername());
+		user.setUpdatetime(new Date());
+		int i = userService.updateUserInfo(user);
 		System.out.println(i);
 		log.info("用户信息更新成功！");
 		return "SUCCESS";
@@ -146,7 +170,7 @@ public class AdminController {
 	@ResponseBody
 	public Map<String, Object> findUserRolesByUserId(@RequestParam("userId") Integer userId) {
 		log.info("查询用户的角色信息！");
-		List<Role> roleList = usersService.findUserRolesByUserId(userId);
+		List<Role> roleList = userService.findUserRolesByUserId(userId);
 		Map<String, Object> roles = new HashMap<String, Object>(16);
 		roles.put("code", 0);
 		roles.put("data", roleList);
@@ -165,7 +189,7 @@ public class AdminController {
 	@ResponseBody
 	public String findUnAddedRolesByUserId(@RequestParam("userId") Integer userId) {
 		log.info("查询当前用户为添加的角色信息！");
-		List<Role> roleList = usersService.findUnAddedRolesByUserId(userId);
+		List<Role> roleList = userService.findUnAddedRolesByUserId(userId);
 		Map<String, Object> roles = new HashMap<String, Object>(16);
 		roles.put("code", 0);
 		roles.put("data", roleList);
@@ -177,7 +201,7 @@ public class AdminController {
 	@ResponseBody
 	public String addRoles(@RequestBody List<Role> roles) {
 		log.info("为用户添加角色！");
-		usersService.addRoles(roles);
+		userService.addRoles(roles);
 		log.info("为用户添加角色！");
 		return "SUCCESS";
 	}
@@ -186,7 +210,7 @@ public class AdminController {
 	@ResponseBody
 	public String deleteRole(@RequestParam("roleId") Integer roleId, @RequestParam("userId") Integer userId) {
 		log.info("为用户删除某个角色！");
-		usersService.deleteRole(roleId, userId);
+		userService.deleteRole(roleId, userId);
 		log.info("成功为用户删除某个角色！");
 		return "SUCCESS";
 	}
@@ -195,9 +219,29 @@ public class AdminController {
 	@ResponseBody
 	public String deleteRoles(@RequestBody List<Role> roles) {
 		log.info("为用户删除多个角色！");
-		usersService.deleteRoles(roles);
+		userService.deleteRoles(roles);
 		log.info("成功为用户删除多个角色！");
 		return "SUCCESS";
 	}
+	
+	
+	//角色模块
+	@RequestMapping("/showRoleList")
+	@ResponseBody
+	public Result<Role> roleList(@RequestParam(value="page",required=false,defaultValue="1")Integer currentPage,
+			@RequestParam(value="limit",required=false,defaultValue="10")Integer limit){
+		log.info("查询角色清单！");
+		
+		Page<Role> page = new Page<Role>(currentPage,limit);
+		IPage<Role> iPage = roleService.selectPage(page);
+		Result<Role> result = new Result<Role>();
+		result.setCode(0);
+		result.setCount((int) iPage.getTotal());
+		result.setData(iPage.getRecords());
+		log.info("返回角色清单给前台！");
+		return result;
+	}
 
+	
+	//文件上传下载模块
 }

@@ -1,7 +1,7 @@
 package com.smic.cf.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,122 +9,123 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
-import com.smic.cf.mapper.master.UsersMapper;
-import com.smic.cf.service.UsersService;
+import com.smic.cf.mapper.master.UserMapper;
+import com.smic.cf.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@Service
-@Transactional(rollbackFor = Exception.class)
 /**
  * 
  * @ClassName UsersServiceImpl
- * @Description TODO(这里用一句话描述这个类的作用)
+ * @Description (这里用一句话描述这个类的作用)
  * @author cai feng
  * @date 2019年6月21日
  *
  */
-public class UsersServiceImpl implements UsersService {
+@Slf4j
+@Service
+@Transactional(rollbackFor = Exception.class)
+public class UsersServiceImpl implements UserService {
 
 	@Autowired
-	private UsersMapper usersMapper;
+	private UserMapper userMapper;
 
 	@Override
 	public User verifyUser(String username, String password) {
 		log.info("进入UsersService层:verifyUser!");
-//		return usersMapper.verifyUser(username, password); 使用MybatisPlus替换
+//		return userMapper.verifyUser(username, password); 使用MybatisPlus替换
 		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
 		queryWrapper.eq("username", username);
 		queryWrapper.eq("password", password);
-		User user = usersMapper.selectOne(queryWrapper);
+		User user = userMapper.selectOne(queryWrapper);
 		return user;
 	}
 
 	@Override
 	public String findUserById(Integer userid) {
 		log.info("查看用户的旧密码！");
-		String password = usersMapper.findUserPasswordById(userid);
+		String password = userMapper.findUserPasswordById(userid);
 		return password;
 	}
 
 	@Override
 	public void updatePasswordById(Integer userid, String newPassword) {
 		log.info("修改密码！");
-		usersMapper.updatePasswordById(userid, newPassword);
-	}
-
-	@Override
-	public void addUser(String username, String password, String state) {
-		log.info("处理注册用户！");
-		HashMap<String, String> userMap = new HashMap<>(16);
-		userMap.put("username", username);
-		userMap.put("password", password);
-		userMap.put("state", state);
-		usersMapper.insertUser(userMap);
+		userMapper.updatePasswordById(userid, newPassword);
 	}
 
 	@Override
 	public User findUserByUsername(String username) {
-
-		return usersMapper.findUserByUserName(username);
+		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("username", username);
+		// return userMapper.findUserByUserName(username);使用MybatisPlus替换
+		return userMapper.selectOne(queryWrapper);
 	}
 
 	@Override
 	public List<User> findAllUsers() {
-		// return usersMapper.findAllUsers(); 使用MybatisPlus替换
-		return usersMapper.selectList(null);
+		// return userMapper.findAllUsers(); 使用MybatisPlus替换
+		return userMapper.selectList(null);
 	}
 
 	@Override
-	public void updateStateById(String state, Integer userId) {
-		usersMapper.updateStateById(state, userId);
+	public void updateStateById(String state, Integer userId, String username) {
+		userMapper.updateStateById(state, userId);
+		// 记录更新时间及记录更新人员
+		User user = userMapper.selectById(userId);
+		user.setUpdatetime(new Date());
+		user.setUpdatePerson(username);
+		QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
+		queryWrapper.eq("user_id", userId);
+		userMapper.update(user, queryWrapper);
 	}
 
 	@Override
 	public void deleteUserById(Integer userId) {
 		log.info("删除用户角色信息！");
-		usersMapper.deleteUserRoles(userId);
+		userMapper.deleteUserRoles(userId);
 		log.info("删除用户！");
-//		usersMapper.deleteUserById(userId);
-		usersMapper.deleteById(userId);
+//		userMapper.deleteUserById(userId);
+		userMapper.deleteById(userId);
 	}
 
 	@Override
 	public void deleteUsers(List<User> users) {
 		for (User user : users) {
 			log.info("删除用户" + user.getUsername() + "的所有角色");
-			usersMapper.deleteUserRoles(user.getUserId());
+			userMapper.deleteUserRoles(user.getUserId());
 			log.info("删除用户" + user.getUsername() + "！");
-			usersMapper.deleteById(user.getUserId());
+			userMapper.deleteById(user.getUserId());
 		}
-//		usersMapper.deleteUsers(users); 舍弃该方法，为了在删除用户的同时能删除该用户的角色
+//		userMapper.deleteUsers(users); 舍弃该方法，为了在删除用户的同时能删除该用户的角色
 	}
 
 	@Override
 	public List<User> findAllUserWithRoles() {
 
-		return usersMapper.findAllUserWithRoles();
+		return userMapper.findAllUserWithRoles();
 	}
 
 	@Override
 	public List<Role> findUserRolesByUserId(Integer userId) {
 
-		return usersMapper.findUserRolesByUserId(userId);
+		return userMapper.findUserRolesByUserId(userId);
 	}
 
 	@Override
 	public List<Role> findUnAddedRolesByUserId(Integer userId) {
-		List<Role> roles = usersMapper.findUnAddedRolesByUserId(userId);// 查询未添加的角色
-		List<Role> existRoles = usersMapper.findUserRolesByUserId(userId);// 查询已添加的角色
-		int rolesCount = usersMapper.countRols();
+		List<Role> roles = userMapper.findUnAddedRolesByUserId(userId);// 查询未添加的角色
+		List<Role> existRoles = userMapper.findUserRolesByUserId(userId);// 查询已添加的角色
+		int rolesCount = userMapper.countRols();
 		log.info("查询角色表当前的角色数是：" + rolesCount);
 		log.info("用户已经拥有的角色数是：" + existRoles.size());
 		if (roles.size() == rolesCount || (roles.size() == existRoles.size() && roles.size() == 0)) {
 			log.info("当前用户未添加角色！");
-			List<Role> roles2 = usersMapper.findAllRoles();
+			List<Role> roles2 = userMapper.findAllRoles();
 			for (Role role : roles2) {
 				User user = new User();
 				user.setUserId(userId);
@@ -146,15 +147,15 @@ public class UsersServiceImpl implements UsersService {
 		for (Role role : roles) {
 			ArrayList<User> users = role.getUsers();
 			User user = users.get(0);
-			usersMapper.insertRoles(role.getRoleId(), user.getUserId());
-			log.info("成功添加角色" + role.getRolename());
+			userMapper.insertRoles(role.getRoleId(), user.getUserId());
+			log.info("成功添加角色" + role.getRoleName());
 		}
 
 	}
 
 	@Override
 	public void deleteRole(Integer roleId, Integer userId) {
-		usersMapper.deleteRole(roleId, userId);
+		userMapper.deleteRole(roleId, userId);
 	}
 
 	@Override
@@ -162,7 +163,7 @@ public class UsersServiceImpl implements UsersService {
 		for (Role role : roles) {
 			ArrayList<User> users = role.getUsers();
 			User user = users.get(0);
-			usersMapper.deleteRole(role.getRoleId(), user.getUserId());
+			userMapper.deleteRole(role.getRoleId(), user.getUserId());
 		}
 
 	}
@@ -170,12 +171,47 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	public int updateUserInfo(User user) {
 
-//		int i = usersMapper.updateUserInfo(user);
+//		int i = userMapper.updateUserInfo(user);
 		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
 		queryWrapper.eq("user_id", user.getUserId());
-		int i = usersMapper.update(user, queryWrapper);
+		int i = userMapper.update(user, queryWrapper);
 		return i;
 
 	}
+
+	@Override
+	public void addUser(User user) {
+		log.info("处理注册用户！");
+		userMapper.insert(user);
+	}
+
+	/**
+	 * mybatisPlus的分页插件失效,暂时未找到解决方法，只能出此下策。
+	 */
+	@Override
+	public IPage<User> selectPage(Page<User> page) {
+		QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
+		Integer selectCount = userMapper.selectCount(queryWrapper);
+
+		// TODO 需要解决Page失效问题
+		page.setTotal(selectCount);
+		long currentPage = (page.getCurrent() - 1) * page.getSize();
+		queryWrapper.apply("1=1 order by user_id asc limit {0},{1}", currentPage, page.getSize());
+
+		return userMapper.selectPage(page, queryWrapper);
+	}
+
+	/**
+	 * 被MybatisPlus取代的方法
+	 */
+//	@Override
+//	public void addUser(String username, String password, String state) {
+//		log.info("处理注册用户！");
+//		HashMap<String, String> userMap = new HashMap<>(16);
+//		userMap.put("username", username);
+//		userMap.put("password", password);
+//		userMap.put("state", state);
+//		userMapper.insertUser(userMap);
+//	}
 
 }
