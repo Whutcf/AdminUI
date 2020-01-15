@@ -8,12 +8,12 @@ import org.apache.ibatis.annotations.Param;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
+import com.smic.cf.domain.UserRole;
 
 @Mapper
-public interface RoleMapper extends BaseMapper<Role> {
+public interface UserRoleMapper extends BaseMapper<UserRole> {
 
-	List<Role> selectRolesByUserId(@Param(Constants.WRAPPER) Wrapper<User> wrapper);
+	List<Integer> selectRoleIds(@Param(Constants.WRAPPER) Wrapper<User> wrapper);
 
 }

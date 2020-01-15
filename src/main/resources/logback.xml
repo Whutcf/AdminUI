@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<property name="LOG_HOME" value="E:\\weblogs" />
+	<property name="LOG_HOME" value="D:\\weblogs" />
 	<!--设置系统日志目录 -->
 	<property name="APPDIR" value="AdminUI" />
 

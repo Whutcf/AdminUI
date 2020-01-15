@@ -32,7 +32,7 @@ public class AdminInterceptor extends HandlerInterceptorAdapter {
 			response.sendRedirect(request.getContextPath()+"/toPermisson");
 			return false;
 		}
-		log.info(user.getUsername()+"登入AdminUI！");
+		log.info("{} 登入AdminUI！",user.getUserName());
 		return true;
 	}
 

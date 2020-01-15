@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.smic.cf.domain.Role;
 import com.smic.cf.domain.User;
+import com.smic.cf.domain.UserRole;
 import com.smic.cf.service.RoleService;
+import com.smic.cf.service.UserRoleService;
 import com.smic.cf.service.UserService;
 import com.smic.cf.util.Result;
 
@@ -44,6 +44,8 @@ public class AdminController {
 	private UserService userService;
 	@Autowired
 	private RoleService roleService;
+	@Autowired
+	private UserRoleService userRoleService;
 
 	@RequestMapping("/toAdminMaintain")
 	public String toAdminMaintain(Model model) {
@@ -72,19 +74,10 @@ public class AdminController {
 	@ResponseBody
 	public Result<User> userList(
 			@RequestParam(value = "page", required = false, defaultValue = "1") Integer currentPage,
-			@RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
+			@RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+			@RequestParam(value="userName",required=false,defaultValue="") String userName) {
 		log.info("查询所有用户信息给前台！");
-//		修改为分页展示
-//		List<User> userList = userService.findAllUsers();
-//		Map<String, Object> users = new HashMap<String, Object>(16);
-//		users.put("code", 0);
-//		users.put("data", userList);
-		Page<User> page = new Page<>(currentPage,limit,true);
-		IPage<User> iPage = userService.selectPage(page);
-		Result<User> result = new Result<>();
-		result.setData(iPage.getRecords());
-		result.setCode(0);
-		result.setCount((int) iPage.getTotal());
+		Result<User> result = userService.selectPage(currentPage,limit,userName);
 		log.info("传送用户信息给前台！");
 		return result;
 	}
@@ -108,7 +101,7 @@ public class AdminController {
 		String state = jsonMap.get("state").toString();
 		String strUserId = jsonMap.get("userId").toString();
 		User userInfo = (User) request.getSession().getAttribute("userinfo");
-		String username = userInfo.getUsername();
+		String username = userInfo.getUserName();
 		Integer userId = (Integer) Integer.parseInt(strUserId);
 		if (STATE_DEFULT.equalsIgnoreCase(state)) {
 			userService.updateStateById("T", userId, username);
@@ -151,11 +144,10 @@ public class AdminController {
 	public String updateUserInfo(@RequestBody User user,HttpServletRequest request) {
 		log.info("更新用户信息！");
 		User userinfo = (User) request.getSession().getAttribute("userinfo");
-		user.setUpdatePerson(userinfo.getUsername());
-		user.setUpdatetime(new Date());
-		int i = userService.updateUserInfo(user);
-		System.out.println(i);
-		log.info("用户信息更新成功！");
+		user.setUpdatePerson(userinfo.getUserName());
+		user.setUpdateTime(new Date());
+		userService.updateUserInfo(user);
+		log.info("{} 更新用户信息成功！",user.getUpdatePerson());
 		return "SUCCESS";
 	}
 
@@ -170,14 +162,11 @@ public class AdminController {
 
 	@RequestMapping("/findUserRolesByUserId")
 	@ResponseBody
-	public Map<String, Object> findUserRolesByUserId(@RequestParam("userId") Integer userId) {
-		log.info("查询用户的角色信息！");
-		List<Role> roleList = userService.findUserRolesByUserId(userId);
-		Map<String, Object> roles = new HashMap<String, Object>(16);
-		roles.put("code", 0);
-		roles.put("data", roleList);
+	public Result<Role> findUserRolesByUserId(@RequestParam("userId") Integer userId) {
+		log.info("查询 {} 的角色信息！",userService.findUserNameById(userId));
+		Result<Role> result = roleService.findUserRolesByUserId(userId);		
 		log.info("返回用户角色信息！");
-		return roles;
+		return result;
 	}
 
 	@RequestMapping("/toAddminAddRoles")
@@ -189,22 +178,27 @@ public class AdminController {
 
 	@RequestMapping("/findUnAddedRolesByUserId")
 	@ResponseBody
-	public String findUnAddedRolesByUserId(@RequestParam("userId") Integer userId) {
-		log.info("查询当前用户为添加的角色信息！");
-		List<Role> roleList = userService.findUnAddedRolesByUserId(userId);
-		Map<String, Object> roles = new HashMap<String, Object>(16);
-		roles.put("code", 0);
-		roles.put("data", roleList);
-		log.info("返回未添加的用户角色信息！");
-		return JSON.toJSONString(roles);
+	public Result<Role> findUnAddedRolesByUserId(@RequestParam("userId") Integer userId) {
+		log.info("查询 {} 未拥有的角色信息！",userService.findUserNameById(userId));	
+		Result<Role> result = roleService.findUnAddedRolesByUserId(userId);
+		return result;
 	}
 
 	@RequestMapping("/addRoles")
 	@ResponseBody
-	public String addRoles(@RequestBody List<Role> roles) {
-		log.info("为用户添加角色！");
-		userService.addRoles(roles);
-		log.info("为用户添加角色！");
+	public String addRoles(@RequestBody List<UserRole> userRoles,HttpServletRequest request ) {
+		User userinfo = (User) request.getSession().getAttribute("userinfo");
+		Integer userId = userRoles.get(0).getUserId();
+		String loginUserName = userinfo.getUserName();
+		User user = userService.findUserById(userId);
+		log.info("{} 开始为用户 {} 添加角色！",loginUserName,user.getUserName());
+		userRoleService.add(userRoles);
+		
+		log.info("{} 成功为用户 {} 添加角色！",loginUserName,user.getUserName());
+		
+		user.setUpdatePerson(loginUserName);
+		user.setUpdateTime(new Date());
+		userService.updateUserInfo(user);
 		return "SUCCESS";
 	}
 
@@ -212,34 +206,36 @@ public class AdminController {
 	@ResponseBody
 	public String deleteRole(@RequestParam("roleId") Integer roleId, @RequestParam("userId") Integer userId) {
 		log.info("为用户删除某个角色！");
-		userService.deleteRole(roleId, userId);
+		userRoleService.deleteRole(roleId, userId);
 		log.info("成功为用户删除某个角色！");
 		return "SUCCESS";
 	}
 
 	@RequestMapping("/deleteRoles")
 	@ResponseBody
-	public String deleteRoles(@RequestBody List<Role> roles) {
+	public String deleteRoles(@RequestBody List<UserRole> userRoles) {
 		log.info("为用户删除多个角色！");
-		userService.deleteRoles(roles);
+		userRoleService.deleteRoles(userRoles);
 		log.info("成功为用户删除多个角色！");
 		return "SUCCESS";
 	}
 	
 	
-	//角色模块
+	/**
+	 * 查询角色清单
+	 * @param currentPage
+	 * @param limit
+	 * @return
+	 */
 	@RequestMapping("/showRoleList")
 	@ResponseBody
 	public Result<Role> roleList(@RequestParam(value="page",required=false,defaultValue="1")Integer currentPage,
 			@RequestParam(value="limit",required=false,defaultValue="10")Integer limit){
 		log.info("查询角色清单！");
-		
-		Page<Role> page = new Page<Role>(currentPage,limit);
-		IPage<Role> iPage = roleService.selectPage(page);
-		Result<Role> result = new Result<Role>();
-		result.setCode(0);
-		result.setCount((int) iPage.getTotal());
-		result.setData(iPage.getRecords());
+
+		Result<Role> result = roleService.selectPage(currentPage,limit);
+	
+
 		log.info("返回角色清单给前台！");
 		return result;
 	}

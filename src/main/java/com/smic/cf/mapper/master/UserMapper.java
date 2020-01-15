@@ -25,8 +25,6 @@ public interface UserMapper extends BaseMapper<User> {
 
 	List<Role> findUserRolesByUserId(Integer userId);
 
-	List<Role> findUnAddedRolesByUserId(@Param("userId") Integer userId);
-
 	void insertRoles(@Param("roleId") Integer roleId, @Param("userId") Integer userId);
 
 	List<Role> findAllRoles();
@@ -36,14 +34,5 @@ public interface UserMapper extends BaseMapper<User> {
 	int countRols();
 
 	void deleteUserRoles(Integer userId);
-
-	/*
-	 * 被MybatisPlus替换掉的方法*
-	 */
-//	User verifyUser(String username, String password);
-//	List<User> findAllUsers();
-//	void deleteUserById(Integer userId);
-//	int updateUserInfo(User user);
-//	User findUserByUserName(String username);
 
 }
